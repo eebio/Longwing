@@ -37,7 +37,9 @@ modules = [Longwing
 makedocs(sitename="Longwing Data Standard",
     repo=Remotes.GitHub("eebio", "Longwing"), modules=modules, checkdocs=:exports,
     pages=PAGES, plugins=[links],
-    format = Documenter.HTML(assets = [RawHTMLHeadContent("""<meta name="google-site-verification" content="JfyX6r31rrWQUAIZV5kiaTJfmdXj0MP3XkwLIsah1_A" />""")]))
+    format = Documenter.HTML(assets = [RawHTMLHeadContent("""<meta name="google-site-verification" content="JfyX6r31rrWQUAIZV5kiaTJfmdXj0MP3XkwLIsah1_A" />"""),
+        RawHTMLHeadContent("""<link rel="canonical" href="https://eebio.github.io/Longwing/stable/" />""")])
+)
 
 # --- AUTOMATED SITEMAP GENERATION ---
 @info "Generating sitemap.xml..."
