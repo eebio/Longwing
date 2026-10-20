@@ -61,7 +61,9 @@ jobs:
           annotate: true
           coverage: true
       - uses: julia-actions/julia-processcoverage@v1
+        if: runner.os != 'Windows'
       - uses: codecov/codecov-action@v7
+        if: runner.os != 'Windows'
         with:
           files: lcov.info
           token: ${{ secrets.CODECOV_TOKEN }}
