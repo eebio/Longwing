@@ -74,6 +74,20 @@ EXPECT:New View Equation>
 TEXT:first_group
 ENTER
 
+# Produce the new view
+EXPECT_WAIT:Main Menu / Views (press [q] to quit):
+ENTER
+EXPECT_WAIT:Select a view to produce (press [q] to quit):
+DOWN
+DOWN
+DOWN
+DOWN
+DOWN
+DOWN
+DOWN
+EXPECT:> temporary_view
+ENTER
+
 # Edit the new view.
 EXPECT_WAIT:Main Menu / Views (press [q] to quit):
 DOWN
@@ -112,6 +126,20 @@ ENTER
 EXPECT:Current equation for temporary_view
 EXPECT:second_group
 EXPECT:New View Equation>
+ENTER
+
+# Produce the edited view
+EXPECT_WAIT:Main Menu / Views (press [q] to quit):
+ENTER
+EXPECT_WAIT:Select a view to produce (press [q] to quit):
+DOWN
+DOWN
+DOWN
+DOWN
+DOWN
+DOWN
+DOWN
+EXPECT:> temporary_view
 ENTER
 
 # Delete the new view.

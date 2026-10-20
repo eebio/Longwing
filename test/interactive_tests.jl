@@ -55,24 +55,6 @@ using TestItemRunner
             script = joinpath(@__DIR__, "interactive_replay.tcl")
             command = Cmd(vcat([expect, script], event_files, ["--"], julia_command.exec))
             run(command)
-        elseif Sys.iswindows()
-            winpty = Sys.which("winpty")
-            winpty === nothing && error("The interactive test requires winpty")
-            events = tempname()
-            try
-                open(events, "w") do io
-                    for event_file in event_files
-                        write(io, interactive_event_bytes(event_file))
-                    end
-                end
-                command = Cmd(vcat([winpty], julia_command.exec))
-                output = read(pipeline(command, stdin=events))
-                text = String(output)
-                occursin("LONGWING_INTERACTIVE_TEST_PASSED", text) ||
-                    error("Interactive test child did not report success. Output:\n$text")
-            finally
-                rm(events; force=true)
-            end
         else
             error("Interactive terminal replay is unsupported on this platform")
         end
@@ -90,9 +72,11 @@ end
     if !Sys.iswindows()
         rm(joinpath(@__DIR__, "temp.lw"); force=true)
         rm(joinpath(@__DIR__, "group1.csv"); force=true)
+        rm(joinpath(@__DIR__, "temporary_view.csv"); force=true)
         rm(joinpath(@__DIR__, "test2.lw"); force=true)
         @test !isfile(joinpath(@__DIR__, "temp.lw"))
         @test !isfile(joinpath(@__DIR__, "group1.csv"))
+        @test !isfile(joinpath(@__DIR__, "temporary_view.csv"))
         @test !isfile(joinpath(@__DIR__, "test2.lw"))
         InteractiveReplay.run_interactive_replays(
             [
@@ -107,9 +91,11 @@ end
         )
         @test isfile(joinpath(@__DIR__, "temp.lw"))
         @test isfile(joinpath(@__DIR__, "group1.csv"))
+        @test isfile(joinpath(@__DIR__, "temporary_view.csv"))
         @test isfile(joinpath(@__DIR__, "test2.lw"))
         rm(joinpath(@__DIR__, "temp.lw"); force=true)
         rm(joinpath(@__DIR__, "group1.csv"); force=true)
+        rm(joinpath(@__DIR__, "temporary_view.csv"); force=true)
         rm(joinpath(@__DIR__, "test2.lw"); force=true)
     end
 end
