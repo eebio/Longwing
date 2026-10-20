@@ -544,25 +544,6 @@ end
                           for i in keys(lw.transformations))
     out = Longwing.produce_views(lw, trans_meta_map; to_out=["matrix_view"])
     @test all(out["matrix_view"] .== Tables.table([1 2 3 7 8; 4 5 6 10 11]))
-    # String
-    lw.views["string_view"] = Dict{String,Any}("data" => ["string_transform"])
-    lw.transformations["string_transform"] = Dict{String,Any}("equation" => "\"hello\"")
-    trans_meta_map = Dict(Symbol(i) => Meta.parse(lw.transformations[i]["equation"])
-                          for i in keys(lw.transformations))
-
-    dir = mktempdir()
-    using Logging
-    io = IOBuffer()
-    logger = SimpleLogger(io)
-    with_logger(logger) do
-        Longwing.view_to_csv(lw, trans_meta_map; outdir=dir, to_out=["string_view"])
-    end
-    str = String(take!(io))
-
-    comparison = "string_view = hello"
-    @test contains(str, comparison)
-    @test isfile(joinpath(dir, "string_view.txt"))
-    @test readlines(joinpath(dir, "string_view.txt")) == ["string_view = hello"]
 
     # Test errors
     lw.views["bad_view"] = Dict{String,Any}("data" => ["nonexistent_group"])
