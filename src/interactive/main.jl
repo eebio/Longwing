@@ -75,11 +75,8 @@ function save_lw(lw, changes_made; exit_on_success=false)
         # Check metadata compatibility
         new_metadata = get_metadata()
         old_metadata = lw.metadata
-        if new_metadata["longwing_version"] != old_metadata["longwing_version"] ||
-            new_metadata["longwing_data_standard_version"] != old_metadata["longwing_data_standard_version"] ||
-            new_metadata["Project.toml"] != old_metadata["Project.toml"] ||
-            new_metadata["Manifest.toml"] != old_metadata["Manifest.toml"] ||
-            new_metadata["versioninfo"] != old_metadata["versioninfo"]
+        if new_metadata["longwing_version"] != VersionNumber(old_metadata["longwing_version"]) ||
+            new_metadata["longwing_data_standard_version"] != old_metadata["longwing_data_standard_version"]
             match = false
         else
             match = true
