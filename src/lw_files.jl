@@ -26,6 +26,72 @@ function read_longwing(file::AbstractString)
     @info "Reading Longwing Data Standard file at: $file"
     # Read in the file in a JSON format
     ef = JSON.parsefile(file)
+    lw = convert(lw_zones, ef)
+    @info "Longwing Data Standard file successfully read."
+    return lw
+end
+
+"""
+    write_longwing(data, file::AbstractString)
+
+Write the Longwing data to the path `file`.
+"""
+function write_longwing(data::OrderedDict, file::AbstractString)
+    JSON.json(file, data; pretty=true)
+    @info "Longwing Data Standard file written to $file"
+end
+
+function write_longwing(data::lw_zones, file::AbstractString)
+    data = convert(OrderedDict, data)
+    write_longwing(data, file)
+end
+
+function Base.convert(::Type{OrderedDict}, data::lw_zones)
+    samples = OrderedDict()
+    for row in eachrow(data.samples)
+        sample_name, channel = split(string(row.name), ".")
+        if !haskey(samples, sample_name)
+            samples[sample_name] = Dict(
+                "type" => row.type,
+                "values" => Dict{String, Any}(),
+                "metadata" => Dict{String, Any}())
+        end
+        samples[sample_name]["values"][channel] = row.values
+        merge!(samples[sample_name]["metadata"], row.metadata)
+        if row.type == "population"
+            # Add some channel specific metadata
+            flow_meta_keys = ["ex_wav", "ex_pow", "name", "det_type", "amp_type", "det_volt", "perc_em", "name_s", "range", "filter", "amp_gain", "longwing_well"]
+            samples[sample_name]["metadata"][channel] = Dict(key => value for (key, value) in row.metadata if key in flow_meta_keys)
+            for key in flow_meta_keys
+                if haskey(samples[sample_name]["metadata"], key)
+                    delete!(samples[sample_name]["metadata"], key)
+                end
+            end
+        end
+    end
+
+    groups = OrderedDict()
+    for row in eachrow(data.groups)
+        groups[string(row.group)] = Dict(
+            "sample_IDs" => lowercase.(row.sample_IDs),
+            "metadata" => row.metadata)
+        if haskey(row.metadata, "autodefined") && row.metadata["autodefined"] == "true"
+            groups[string(row.group)]["type"] = "physical"
+        else
+            groups[string(row.group)]["type"] = "experimental"
+        end
+    end
+
+    return OrderedDict(
+        "samples" => samples,
+        "groups" => groups,
+        "transformations" => data.transformations,
+        "views" => data.views,
+        "metadata" => data.metadata
+    )
+end
+
+function Base.convert(::Type{lw_zones}, ef::Union{OrderedDict, JSON.Object})
     max_len = 0
     # Loop over the samples to look for maximum length of array
     for i in keys(ef["samples"])
@@ -62,7 +128,6 @@ function read_longwing(file::AbstractString)
     )
     # Add channels to sample names
     lw.samples.name = string.(lw.samples.name, ".", lw.samples.channel)
-    @info "Longwing Data Standard file successfully read."
     return lw
 end
 
@@ -82,16 +147,6 @@ function sample_channel_metadata(sample_metadata, channel)
         metadata = merge(metadata, Dict("template" => sample_metadata["template"]))
     end
     return metadata
-end
-
-"""
-    write_longwing(data, file::AbstractString)
-
-Write the Longwing data to the path `file`.
-"""
-function write_longwing(data, file::AbstractString)
-    JSON.json(file, data; pretty=true)
-    @info "Longwing Data Standard file written to $file"
 end
 
 function untranslate_longwing(input::AbstractString, output::AbstractString)
@@ -236,7 +291,7 @@ function read_data(file::AbstractString)
     end
     sample_dict = OrderedDict()
     group_dict = OrderedDict(i.Name => Dict(
-        "sample_IDs" => expand_groups(i.Samples),
+        "sample_IDs" => lowercase.(expand_groups(i.Samples)),
         "type" => "experimental",
         "metadata" => Dict{String,Any}(j => i[j]
                                        for j in names(i) if !(j in ["Name", "Samples"])))

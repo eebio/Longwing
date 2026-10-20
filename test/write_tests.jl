@@ -8,11 +8,11 @@
     @test lw["samples"]["plate_02_a1"]["metadata"]["FL1_H"]["range"] == "1024"
     @test lw["samples"]["plate_02_a1"]["metadata"]["FL1_H"]["amp_type"] == "0,0"
     @test lw["groups"]["first_group"]["sample_IDs"] ==
-        ["plate_01_A1", "plate_01_A5", "plate_01_A9"]
+        ["plate_01_a1", "plate_01_a5", "plate_01_a9"]
     @test lw["groups"]["second_group"]["sample_IDs"] ==
-        ["plate_01_A3", "plate_01_A8", "plate_01_A7"]
+        ["plate_01_a3", "plate_01_a8", "plate_01_a7"]
     @test lw["groups"]["third_group"]["sample_IDs"] ==
-        ["plate_01_A1", "plate_01_A2", "plate_01_A3"]
+        ["plate_01_a1", "plate_01_a2", "plate_01_a3"]
 end
 
 @testitem "write lw" setup=[environment_path] begin
@@ -105,23 +105,39 @@ end
         DataFrame(:forward => [628.0, 1023.0, 373.0, 1023.0],
         Symbol("forward.max") => fill(1024.0, 4),
         Symbol("forward.min") => fill(1.0, 4), :id =>
-        [1, 2, 3, 4], :longwing_well => ["A1", "A1", "A1", "A1"])
+        [1, 2, 3, 4], :longwing_well => ["a1", "a1", "a1", "a1"])
     @test isapprox(eval(Longwing.sexp_to_nested_list(:(ssc), lw_written, trans_meta_map))[!, Not(:longwing_well)],
         DataFrame(:SSC_H => [0.0352269, 0.272613, 0.0177828, 0.995513],
             Symbol("SSC_H.max") => fill(1.0, 4),
             Symbol("SSC_H.min") => fill(0.0100451, 4), :id => [1, 2, 3, 4]); atol=0.0001)
     @test eval(Longwing.sexp_to_nested_list(:(ssc), lw_written, trans_meta_map))[!, :longwing_well] ==
-        ["A1", "A1", "A1", "A1"]
+        ["a1", "a1", "a1", "a1"]
     @test isapprox(
         eval(Longwing.sexp_to_nested_list(:(plate_01_a1.FL1_H), lw_written, trans_meta_map))[!, Not(:longwing_well)],
         DataFrame(:FL1_H => [2.26449, 134.403, 1.53816, 64.8638],
             Symbol("FL1_H.max") => fill(256.0, 4),
             Symbol("FL1_H.min") => fill(0.25, 4), :id => [1, 2, 3, 4]); atol=0.0001)
     @test eval(Longwing.sexp_to_nested_list(:(plate_01_a1.FL1_H), lw_written, trans_meta_map))[!, :longwing_well] ==
-        ["A1", "A1", "A1", "A1"]
+        ["a1", "a1", "a1", "a1"]
     @test issetequal(
         names(eval(Longwing.sexp_to_nested_list(:(plate_01), lw_written, trans_meta_map))),
         ["FL1_H", "FL1_H.max", "FL1_H.min", "SSC_H", "SSC_H.max",
             "SSC_H.min", "forward", "forward.max", "forward.min", "newtime",
             "newtime.max", "newtime.min", "newtime.max", "newtime.min", "id", "longwing_well"])
+end
+
+@testitem "write from read" setup=[environment_path] begin
+    println("write from read")
+    lw = read_longwing("inputs/example.lw")
+    println("write from read")
+    filename = joinpath(Base.Filesystem.mktempdir(), "tmp.lw")
+    write_longwing(lw, filename)
+    println("write from read")
+    lw_written = read_longwing(filename)
+    println("write from read")
+    @test isequal(lw.samples, lw_written.samples)
+    @test isequal(lw.groups, lw_written.groups)
+    @test isequal(lw.transformations, lw_written.transformations)
+    @test isequal(lw.views, lw_written.views)
+    @test isequal(lw.metadata, lw_written.metadata)
 end
