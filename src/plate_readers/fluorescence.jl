@@ -31,8 +31,8 @@ function fluorescence(data_fl, time_fl, data_od, time_od, method::RatioAtTime; p
     od_at_time = at_time(data_od, time_od, time)
     out = DataFrame()
     if !isnothing(plot_directory)
-        t = sort(union(time_fl[:, 1], time_od[:, 1])) ./ 60000
-        t = t[t .>= max(minimum(time_fl[:, 1]), minimum(time_od[:, 1])) ./ 60000]
+        t = sort(union(skipmissing(time_fl[:, 1]), skipmissing(time_od[:, 1]))) ./ 60000
+        t = t[t .>= max(minimum(skipmissing(time_fl[:, 1])), minimum(skipmissing(time_od[:, 1]))) ./ 60000]
         fl_new = [DataFrame(at_time(data_fl, time_fl, t[i])) for i in 1:length(t)]
         od_new = [DataFrame(at_time(data_od, time_od, t[i])) for i in 1:length(t)]
         fl_new = vcat(fl_new...)
