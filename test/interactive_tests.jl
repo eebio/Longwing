@@ -72,9 +72,11 @@ end
     if !Sys.iswindows()
         rm(joinpath(@__DIR__, "temp.lw"); force=true)
         rm(joinpath(@__DIR__, "group1.csv"); force=true)
+        rm(joinpath(@__DIR__, "temporary_view.csv"); force=true)
         rm(joinpath(@__DIR__, "test2.lw"); force=true)
         @test !isfile(joinpath(@__DIR__, "temp.lw"))
         @test !isfile(joinpath(@__DIR__, "group1.csv"))
+        @test !isfile(joinpath(@__DIR__, "temporary_view.csv"))
         @test !isfile(joinpath(@__DIR__, "test2.lw"))
         InteractiveReplay.run_interactive_replays(
             [
@@ -89,9 +91,11 @@ end
         )
         @test isfile(joinpath(@__DIR__, "temp.lw"))
         @test isfile(joinpath(@__DIR__, "group1.csv"))
+        @test isfile(joinpath(@__DIR__, "temporary_view.csv"))
         @test isfile(joinpath(@__DIR__, "test2.lw"))
         rm(joinpath(@__DIR__, "temp.lw"); force=true)
         rm(joinpath(@__DIR__, "group1.csv"); force=true)
+        rm(joinpath(@__DIR__, "temporary_view.csv"); force=true)
         rm(joinpath(@__DIR__, "test2.lw"); force=true)
     end
 end
