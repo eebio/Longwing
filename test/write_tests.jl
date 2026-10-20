@@ -125,3 +125,19 @@ end
             "SSC_H.min", "forward", "forward.max", "forward.min", "newtime",
             "newtime.max", "newtime.min", "newtime.max", "newtime.min", "id", "longwing_well"])
 end
+
+@testitem "write from read" setup=[environment_path] begin
+    println("write from read")
+    lw = read_longwing("inputs/example.lw")
+    println("write from read")
+    filename = joinpath(Base.Filesystem.mktempdir(), "tmp.lw")
+    write_longwing(lw, filename)
+    println("write from read")
+    lw_written = read_longwing(filename)
+    println("write from read")
+    @test isequal(lw.samples, lw_written.samples)
+    @test isequal(lw.groups, lw_written.groups)
+    @test isequal(lw.transformations, lw_written.transformations)
+    @test isequal(lw.views, lw_written.views)
+    @test isequal(lw.metadata, lw_written.metadata)
+end
