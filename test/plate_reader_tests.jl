@@ -749,6 +749,8 @@ end
 
 @testitem "fluorescence per cell" setup=[environment_path] begin
     println("fluorescence per cell")
+    using DataFrames
+
     lw = read_data("inputs/biotek.xlsx")
     filename = joinpath(Base.Filesystem.mktempdir(), "tmp.lw")
     write_longwing(lw, filename)
@@ -793,6 +795,19 @@ end
         1, "plate_01_a10"]) == 1411
     # Check files exist in plot directory
     @test length(readdir(dir)) > 0
+
+    # Check that missing values doesn't break things
+    missing_indexes = [1, 2, 3, 4, 5]
+    allowmissing!(od)
+    allowmissing!(fl)
+    allowmissing!(time_fl)
+    allowmissing!(time_od)
+    od[missing_indexes, :] .= missing
+    fl[missing_indexes, :] .= missing
+    time_fl[missing_indexes, :] .= missing
+    time_od[missing_indexes, :] .= missing
+    tmp = fluorescence(fl, time_fl, od, time_od, RatioAtTime(4 * 60); plot_directory=:temp)
+    @test ismissing(fluorescence(fl, time_fl, od, time_od, RatioAtTime(1 * 60); plot_directory=:temp)[1, 1])
 end
 
 @testitem "warning for calibrating multiple channels" begin
