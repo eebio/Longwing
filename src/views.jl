@@ -63,12 +63,10 @@ function view_to_csv(lw, trans_meta_map; outdir="", to_out=[])
         else
             @info "View $i is not a table and cannot be written to CSV."
             if length(vs[i]) == 1
-                str = "$i = $(vs[i][1])"
+                @info "$i = $(vs[i][1])"
             else
-                str = "$i = $(Tuple(vs[i]))"
+                @info "$i = $(Tuple(vs[i]))"
             end
-            @info str
-            write("$(joinpath(outdir,i*".txt"))", str)
         end
     end
     @info "Views written successfully."
