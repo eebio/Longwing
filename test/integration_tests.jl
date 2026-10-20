@@ -60,7 +60,7 @@ end
         for key in keys(f["samples"])
             f["samples"][key]["metadata"]["template"]["data_location"] = ""
         end
-        @test bytes2hex(stable_hash(f; version=4)) == "64dc6c1ad5f4825237ae74b01f819f2fb1725904f43db1bfde4c923bf65333ed"
+        @test bytes2hex(stable_hash(f; version=4)) == "eb5892b4310f04a6759c9cea4df41df81e8af4f847673608e849d514855d51ec"
 
         run(`$(shell) lw untranslate $(joinpath(dir, "tmp.lw")) $(joinpath(dir, "tmp.xlsx"))`)
         @test isfile(joinpath(dir, "tmp.xlsx"))

@@ -47,7 +47,7 @@ function read_flow(samples, sample_dict, channels, broad_g, channel_map)
             end
                                                 for k in propertynames(temp_data))
         for c in current_channels
-            temp["metadata"][channel_map[c]]["longwing_well"] = j.Well
+            temp["metadata"][channel_map[c]]["longwing_well"] = lowercase(j.Well)
         end
 
         # Handle time channel units
