@@ -200,8 +200,6 @@ ENTER
 EXPECT:Filename>
 TEXT:test2.lw
 ENTER
-EXPECT:> Yes, save changes and update the metadata
-ENTER
 
 # Quit
 EXPECT_WAIT:Main Menu (press [q] to quit):

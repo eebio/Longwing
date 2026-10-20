@@ -204,6 +204,4 @@ ENTER
 EXPECT:Filename>
 TEXT:temp.lw
 ENTER
-EXPECT_WAIT:The current version of Longwing is different
-ENTER
 EXPECT:Longwing Data Standard file saved to temp.lw
