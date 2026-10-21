@@ -37,7 +37,7 @@ function perform_recalibration(df, time_col, recalibrate, offset)
         time_col = time_col[mask, :]
         recalibrant = 0.0
     else
-        recalibrant = 0.0
+        error("Invalid value for `recalibrate`. Must be one of :negative, :offset, true, or false.")
     end
     return df, time_col, recalibrant
 end
@@ -74,11 +74,11 @@ Arguments:
 
 Keywords:
 - `recalibrate`: Whether to recalibrate the data using `calibrate` before calculating growth rate. Default is :negative (only if negative values are present in the well). Available options are `:negative`, `:offset` (only if values below the offset are present in the well), true, and false.
-- `offset`: If data is recalibrated, this is the offset applied after calibration. Default is 0.001.
+- `offset::Number`: If data is recalibrated, this is the offset applied after calibration. Default is 0.001.
 - `plot_directory`: If provided, this is the directory to save plots of the growth curves with the fitted growth rate. Default is nothing (no plots saved). If :temp, plots will be saved to a temporary directory.
-- `uncertainty`: If true, the function will also return the uncertainty of the growth rate (standard error). Default is false.
+- `uncertainty::Bool`: If true, the function will also return the uncertainty of the growth rate (standard error). Default is false.
 """
-function growth_rate(df, time_col, method::AbstractGrowthRateMethod; recalibrate=:negative, offset=0.001, plot_directory=nothing, uncertainty=false)
+function growth_rate(df, time_col, method::AbstractGrowthRateMethod; recalibrate=:negative, offset::Number=0.001, plot_directory=nothing, uncertainty::Bool=false)
     plot_directory = process_plot_directory(plot_directory)
 
     dict_2 = Dict()
@@ -110,8 +110,13 @@ Arguments:
 - `df::DataFrame`: DataFrame containing the data.
 - `time_col::DataFrame`: DataFrame containing the times.
 - `method::AbstractGrowthRateMethod`.
+
+Keywords:
+- `recalibrate`: Whether to recalibrate the data using `calibrate` before calculating growth rate. Default is :negative (only if negative values are present in the well). Available options are `:negative`, `:offset` (only if values below the offset are present in the well), true, and false.
+- `offset::Number`: If data is recalibrated, this is the offset applied after calibration. Default is 0.001.
+- `plot_directory`: If provided, this is the directory to save plots of the growth curves with the fitted growth rate. Default is nothing (no plots saved). If :temp, plots will be saved to a temporary directory.
 """
-function max_od(df, time_col, method::AbstractGrowthRateMethod; recalibrate=:negative, offset=0.001, plot_directory=nothing)
+function max_od(df, time_col, method::AbstractGrowthRateMethod; recalibrate=:negative, offset::Number=0.001, plot_directory=nothing)
     plot_directory = process_plot_directory(plot_directory)
 
     dict_2 = Dict()
@@ -137,8 +142,13 @@ Arguments:
 - `df::DataFrame`: DataFrame containing the data.
 - `time_col::DataFrame`: DataFrame containing the times.
 - `method::AbstractGrowthRateMethod`.
+
+Keywords:
+- `recalibrate`: Whether to recalibrate the data using `calibrate` before calculating growth rate. Default is :negative (only if negative values are present in the well). Available options are `:negative`, `:offset` (only if values below the offset are present in the well), true, and false.
+- `offset::Number`: If data is recalibrated, this is the offset applied after calibration. Default is 0.001.
+- `plot_directory`: If provided, this is the directory to save plots of the growth curves with the fitted growth rate. Default is nothing (no plots saved). If :temp, plots will be saved to a temporary directory.
 """
-function time_to_max_growth(df, time_col, method::AbstractGrowthRateMethod; recalibrate=:negative, offset=0.001, plot_directory=nothing)
+function time_to_max_growth(df, time_col, method::AbstractGrowthRateMethod; recalibrate=:negative, offset::Number=0.001, plot_directory=nothing)
     plot_directory = process_plot_directory(plot_directory)
 
     dict_2 = Dict()
@@ -164,8 +174,13 @@ Arguments:
 - `df::DataFrame`: DataFrame containing the data.
 - `time_col::DataFrame`: DataFrame containing the times.
 - `method::AbstractGrowthRateMethod`.
+
+Keywords:
+- `recalibrate`: Whether to recalibrate the data using `calibrate` before calculating growth rate. Default is :negative (only if negative values are present in the well). Available options are `:negative`, `:offset` (only if values below the offset are present in the well), true, and false.
+- `offset::Number`: If data is recalibrated, this is the offset applied after calibration. Default is 0.001.
+- `plot_directory`: If provided, this is the directory to save plots of the growth curves with the fitted growth rate. Default is nothing (no plots saved). If :temp, plots will be saved to a temporary directory.
 """
-function od_at_max_growth(df, time_col, method::AbstractGrowthRateMethod; recalibrate=:negative, offset=0.001, plot_directory=nothing)
+function od_at_max_growth(df, time_col, method::AbstractGrowthRateMethod; recalibrate=:negative, offset::Number=0.001, plot_directory=nothing)
     plot_directory = process_plot_directory(plot_directory)
 
     dict_2 = Dict()
@@ -193,8 +208,13 @@ Arguments:
 - `df::DataFrame`: DataFrame containing the data.
 - `time_col::DataFrame`: DataFrame containing the times.
 - `method::AbstractGrowthRateMethod`.
+
+Keywords:
+- `recalibrate`: Whether to recalibrate the data using `calibrate` before calculating growth rate. Default is :negative (only if negative values are present in the well). Available options are `:negative`, `:offset` (only if values below the offset are present in the well), true, and false.
+- `offset::Number`: If data is recalibrated, this is the offset applied after calibration. Default is 0.001.
+- `plot_directory`: If provided, this is the directory to save plots of the growth curves with the fitted growth rate. Default is nothing (no plots saved). If :temp, plots will be saved to a temporary directory.
 """
-function lag_time(df, time_col, method::AbstractGrowthRateMethod; recalibrate=:negative, offset=0.001, plot_directory=nothing)
+function lag_time(df, time_col, method::AbstractGrowthRateMethod; recalibrate=:negative, offset::Number=0.001, plot_directory=nothing)
     plot_directory = process_plot_directory(plot_directory)
 
     dict_2 = Dict()
