@@ -745,3 +745,31 @@ end
     @test lw["groups"]["plate1"]["metadata"] == Dict("autodefined" => "false", "Plate reader" => true)
     @test lw["groups"]["otherdata"]["metadata"] == Dict("autodefined" => "false", "Plate reader" => false)
 end
+
+@testitem "groups of groups" setup=[environment_path] begin
+    # Test that groups of groups are read in correctly
+    lw = read_data("inputs/groups-of-groups.xlsx")
+    @test issetequal(lw["groups"]["row1"]["sample_IDs"], lowercase.(Longwing.expand_groups("plate_01_a[1:12]")))
+    @test issetequal(lw["groups"]["otherdata"]["sample_IDs"], lowercase.(Longwing.expand_groups("plate_01_c5")))
+    @test issetequal(lw["groups"]["lots_of_wells"]["sample_IDs"], lowercase.(Longwing.expand_groups("plate_01_b[3:2:12], plate_01_[f,h][1:2:3, 5:7, 10, 12]")))
+    @test issetequal(lw["groups"]["repeated_wells"]["sample_IDs"], lowercase.(Longwing.expand_groups("plate_01_A[1:3]")))
+    @test issetequal(lw["groups"]["not_included_wells"]["sample_IDs"], lowercase.(Longwing.expand_groups("plate_01_d[1:8]")))
+    @test issetequal(lw["groups"]["group1"]["sample_IDs"], lowercase.(Longwing.expand_groups("plate_01_a[1:12], plate_01_c5, plate_01_b[3:2:12], plate_01_[f,h][1:2:3, 5:7, 10, 12]")))
+    @test issetequal(lw["groups"]["group2"]["sample_IDs"], lowercase.(Longwing.expand_groups("plate_01_a[1:12], plate_01_c5, plate_01_A[1:3]")))
+    @test issetequal(lw["groups"]["group3"]["sample_IDs"], lowercase.(Longwing.expand_groups("plate_01_a[1:12], plate_01_c5, plate_01_b[3:2:12], plate_01_[f,h][1:2:3, 5:7, 10, 12], plate_01_A[1:3]")))
+    # No duplicated elements
+    group_names = ["row1", "otherdata", "lots_of_wells", "repeated_wells", "not_included_wells", "group1", "group2", "group3"]
+    for group_name in group_names
+        sample_IDs = lw["groups"][group_name]["sample_IDs"]
+        @test length(sample_IDs) == length(unique(sample_IDs))
+    end
+    # Test metadata
+    @test lw["groups"]["row1"]["metadata"]["Plate reader"] == true
+    @test lw["groups"]["otherdata"]["metadata"]["Plate reader"] == false
+    @test lw["groups"]["lots_of_wells"]["metadata"]["Plate reader"] == true
+    @test lw["groups"]["repeated_wells"]["metadata"]["Plate reader"] == true
+    @test lw["groups"]["not_included_wells"]["metadata"]["Plate reader"] == false
+    @test lw["groups"]["group1"]["metadata"]["Plate reader"] == false
+    @test lw["groups"]["group2"]["metadata"]["Plate reader"] == true
+    @test lw["groups"]["group3"]["metadata"]["Plate reader"] == false
+end
