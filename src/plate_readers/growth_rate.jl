@@ -28,6 +28,9 @@ function doubling_time(args...; kwargs...)
 end
 
 function perform_recalibration(df, time_col, recalibrate, offset)
+    if recalibrate isa String
+        recalibrate = Symbol(recalibrate)
+    end
     if (recalibrate == :negative && any(skipmissing(df[:, 1]) .<= 0)) || recalibrate == true || (recalibrate == :offset && any(skipmissing(df[:, 1]) .<= offset))
         recalibrant = minimum(skipmissing(df[:, 1])) - offset
         df = calibrate(df, time_col, MinData(); offset=offset)
@@ -37,7 +40,11 @@ function perform_recalibration(df, time_col, recalibrate, offset)
         time_col = time_col[mask, :]
         recalibrant = 0.0
     else
-        error("Invalid value for `recalibrate`. Must be one of :negative, :offset, true, or false.")
+        if recalibrate in [:negative, :offset, true, false]
+            recalibrant = 0.0
+        else
+            error("Invalid value for `recalibrate=$recalibrate`. Must be one of :negative, :offset, true, or false.")
+        end
     end
     return df, time_col, recalibrant
 end
