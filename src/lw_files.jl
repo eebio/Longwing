@@ -649,6 +649,12 @@ function validate_template(samples, groups, trans, views, channel_map)
         if !isnothing(match(r"^[a-zA-Z][a-zA-Z0-9_]*$", row.Name))
             throw(TemplateError("Transformation name $(row.Name) is invalid. Transformation names must start with a letter and can only contain letters, numbers, and underscores."))
         end
+        try
+            Meta.parse(row.Equation)
+        catch e
+            @warn "Transformation equation $(row.Equation) is invalid. It could not be parsed."
+            rethrow(e)
+        end
     end
 
     # Views
