@@ -147,6 +147,7 @@ function flow_channel(lwchannel, data)
             return c
         end
     end
+    error("Channel $lwchannel not found in data. Available channels: $(format_channel.(all_channels))")
 end
 
 """
