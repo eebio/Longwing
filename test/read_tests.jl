@@ -580,10 +580,10 @@ end
 
     @test issetequal(names(out["v1"]), ["plate_01_a1.700", "plate_01_a1.od"])
     @test issetequal(names(out["v2"]), ["plate_01_a1"])
-    @test issetequal(names(out["v3"]), Longwing.expand_groups("plate_01_[a,b][1:4].[700,od]"))
-    @test issetequal(names(out["v4"]), Longwing.expand_groups("plate_01_[a,b][1:4].[700,od]"))
-    @test issetequal(names(out["v5"]), Longwing.expand_groups("plate_01_[a,b][1:4].[700,od], plate_01_e[5:7].[700,od]"))
-    @test issetequal(names(out["v6"]), Longwing.expand_groups("plate_01_[a,b][1:4].[od,700,od_1,700_1], plate_01_e[5:7].[od,700,od_1,700_1],plate_01_time,plate_01_a1.[od_2,700_2],plate_01_[a,b][1:4],plate_01_a6.[od,700],plate_01_a7"))
+    @test issetequal(names(out["v3"]), Longwing.expand_groups("plate_01_[a,b][1:4].[700,od]"; error_check=false))
+    @test issetequal(names(out["v4"]), Longwing.expand_groups("plate_01_[a,b][1:4].[700,od]"; error_check=false))
+    @test issetequal(names(out["v5"]), Longwing.expand_groups("plate_01_[a,b][1:4].[700,od], plate_01_e[5:7].[700,od]"; error_check=false))
+    @test issetequal(names(out["v6"]), Longwing.expand_groups("plate_01_[a,b][1:4].[od,700,od_1,700_1], plate_01_e[5:7].[od,700,od_1,700_1],plate_01_time,plate_01_a1.[od_2,700_2],plate_01_[a,b][1:4],plate_01_a6.[od,700],plate_01_a7"; error_check=false))
 end
 
 @testitem "kw name collision" setup=[environment_path] begin
@@ -722,7 +722,7 @@ end
 
 @testitem "invalid channel map" setup=[environment_path] begin
     # Test that invalid channel map entries are handled gracefully
-    @test_throws "Some channels in the channel map are not in a valid format" read_data("inputs/invalid_channel_map.xlsx")
+    @test_throws "New channel name a really bad channel name" read_data("inputs/invalid_channel_map.xlsx")
 end
 
 @testitem "requested missing channel" setup=[environment_path] begin

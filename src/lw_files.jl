@@ -503,7 +503,7 @@ end
 
 Iteratively call `expand_group` on a comma-separated list of group names.
 """
-function expand_groups(groups::AbstractString)
+function expand_groups(groups::AbstractString; error_check=true)
     expanded = []
     # Split on commas not inside brackets
     wells = split(groups, r",(?![^\[]*\])")
@@ -517,9 +517,11 @@ function expand_groups(groups::AbstractString)
     end
     expanded = unique(lowercase.(expanded))
     # Validate well syntax
-    for id in expanded
-        if isnothing(match(r"^plate_\d\d_[a-z]\d+$", id))
-            throw(TemplateError("Invalid well syntax in group expansion: group $groups produces $id which is not valid syntax."))
+    if error_check
+        for id in expanded
+            if isnothing(match(r"^plate_\d\d_([a-z]\d+|time|temperature)$", id))
+                throw(TemplateError("Invalid well syntax in group expansion: group $groups produces $id which is not valid syntax."))
+            end
         end
     end
     return expanded
@@ -636,48 +638,52 @@ function validate_template(samples, groups, trans, views, channel_map)
         ismissing(row.Name) && throw(TemplateError("Group name is missing for one of the groups."))
         ismissing(row.Samples) && throw(TemplateError("Samples are missing for one of the groups."))
         # Check the names are valid syntax
-        if !isnothing(match(r"^[a-zA-Z][a-zA-Z0-9_]*$", row.Name))
+        isnothing(match(r"^[a-zA-Z][a-zA-Z0-9_]*$", row.Name)) &&
             throw(TemplateError("Group name $(row.Name) is invalid. Group names must start with a letter and can only contain letters, numbers, and underscores."))
-        end
     end
+    groups.Name = string.(groups.Name)
+    groups.Samples = string.(groups.Samples)
 
     # Transformations
     for row in eachrow(trans)
         ismissing(row.Name) && throw(TemplateError("Transformation name is missing for one of the transformations."))
         ismissing(row.Equation) && throw(TemplateError("Transformation equation is missing for one of the transformations."))
         # Check the names are valid syntax
-        if !isnothing(match(r"^[a-zA-Z][a-zA-Z0-9_]*$", row.Name))
+        isnothing(match(r"^[a-zA-Z][a-zA-Z0-9_]*$", row.Name)) &&
             throw(TemplateError("Transformation name $(row.Name) is invalid. Transformation names must start with a letter and can only contain letters, numbers, and underscores."))
-        end
         try
-            Meta.parse(row.Equation)
+            Meta.parse(string(row.Equation))
         catch e
             @warn "Transformation equation $(row.Equation) is invalid. It could not be parsed."
             rethrow(e)
         end
     end
+    trans.Name = string.(trans.Name)
+    trans.Equation = string.(trans.Equation)
 
     # Views
     for row in eachrow(views)
         ismissing(row.Name) && throw(TemplateError("View name is missing for one of the views."))
         ismissing(row.View) && throw(TemplateError("View data is missing for one of the views."))
         # Check the names are valid syntax
-        if !isnothing(match(r"^[a-zA-Z][a-zA-Z0-9_]*$", row.Name))
+        isnothing(match(r"^[a-zA-Z][a-zA-Z0-9_]*$", row.Name)) &&
             throw(TemplateError("View name $(row.Name) is invalid. View names must start with a letter and can only contain letters, numbers, and underscores."))
-        end
     end
+    views.Name = string.(views.Name)
+    views.View = string.(views.View)
 
     for row in eachrow(channel_map)
         ismissing(row."Channel") && throw(TemplateError("Channel name is missing for one of the channel map entries."))
         ismissing(row."New name") && throw(TemplateError("New channel name is missing for one of the channel map entries."))
         # Check the new names are valid syntax
-        if !isnothing(match(r"^[a-zA-Z][a-zA-Z0-9_]*$", row."New name"))
+        isnothing(match(r"^[a-zA-Z][a-zA-Z0-9_]*$", row."New name")) &&
             throw(TemplateError("New channel name $(row."New name") is invalid. New channel names must start with a letter and can only contain letters, numbers, and underscores."))
-        end
         # Check the old name is in samples (or at least one of the samples has all channels (i.e. is empty))
-        if !any(ismissing(samples.Channels))
-            possible_channels = split(join(samples.Channels, ","), ",")
-            row.Channel in possible_channels || throw(TemplateError("Channel $(row."Channel") is not present in any of the samples."))
+        if !any(ismissing.(samples.Channels))
+            possible_channels = strip.(split(join(samples.Channels, ","), ","))
+            row.Channel in possible_channels || throw(TemplateError("Channel $(row."Channel") is not present in any of the samples. Possible channels are: $(possible_channels)"))
         end
     end
+    channel_map."Channel" = string.(channel_map."Channel")
+    channel_map."New name" = string.(channel_map."New name")
 end
