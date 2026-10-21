@@ -155,10 +155,14 @@ function sexp_to_nested_list(sexp, lw, trans_meta_map)
             return sexp_to_nested_list(trans_meta_map[sexp], lw, trans_meta_map)
         elseif string(sexp) in lw.groups.group
             # Is the symbol a group?
-            return Longwing.get_group(lw, sexp)
+            data = Longwing.get_group(lw, sexp)
+            nrow(data) == 0 && error("Group $sexp has no data.")
+            return data
         elseif string(sexp) in first.(splitext.(lw.samples.name))
             # Is the symbol a sample?
-            return Longwing.get_sample(lw, string(sexp))
+            data = Longwing.get_sample(lw, string(sexp))
+            nrow(data) == 0 && error("Sample $sexp has no data.")
+            return data
         end
         # Just return it - its something else
         return sexp
@@ -185,7 +189,15 @@ function sexp_to_nested_list(sexp, lw, trans_meta_map)
                 # Want to make sure this isn't some other dot expression
                 if any(last.(splitext.(lw.samples.name)) .== ".$channel")
                     # This is channel access
-                    return Longwing.filter_channel(sexp.args[1], channel)
+                    first_arg = sexp.args[1]
+                    if first_arg isa Expr
+                        first_arg = eval(first_arg)
+                    end
+                    if first_arg isa DataFrame
+                        data = Longwing.filter_channel(first_arg, channel)
+                        nrow(data) == 0 && error("When indexing by channel $channel, no data was returned. Check that the channel is spelled correctly.")
+                        return data
+                    end
                 end
             end
         end

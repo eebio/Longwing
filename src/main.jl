@@ -27,11 +27,10 @@ end
 
 function filter_channel(df::DataFrame, channel)
     channel = string(channel)
+    if !any(occursin.(".", names(df)))
+        error("DataFrame does not contain any channels. It has already been channel-indexed.")
+    end
     return remove_subcols(df[:, filter(colname -> channel in split(colname, ".") || colname == "id" || colname == "longwing_well", names(df))], channel)
-end
-
-function filter_channel(df::Expr, channel)
-    return filter_channel(eval(df), channel)
 end
 
 """
