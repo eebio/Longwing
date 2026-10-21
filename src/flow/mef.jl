@@ -24,7 +24,16 @@ function cluster(data, method; plot_directory = nothing)
 
     # Plot data
     if !isnothing(plot_directory)
-        p = histogram(data; bins = range(minimum(data), stop = maximum(data), length = 500),
+        datarange = maximum(data) - minimum(data)
+        # Check for 1 very large bin
+        h = fit(Histogram, data[:, 1], range(minimum(data) - datarange/500, stop=maximum(data) + datarange/500, length=500))
+        sorted_weights = sort(h.weights, rev=true)
+        if sorted_weights[1] > 2 * sorted_weights[2]
+            ylims = (0, sorted_weights[2] * 1.5)
+        else
+            ylims = nothing
+        end
+        p = histogram(data; ylims=ylims, bins = range(minimum(data) - datarange/500, stop = maximum(data) + datarange/500, length = 500),
             linecolor=nothing, label=nothing, xlabel = "Transform('$(method.channel)') (RFI)",
             ylabel = "Count", title = "MEF Calibration: Fluorescence Data",
         )
@@ -58,7 +67,8 @@ function cluster(data, method; plot_directory = nothing)
                 continue
             end
             histogram!(p, c;
-                bins = range(minimum(data), stop = maximum(data), length = 500),
+                ylims=ylims,
+                bins = range(minimum(data) - datarange/500, stop = maximum(data) + datarange/500, length = 500),
                 linecolour = nothing, colour = i, label = "Cluster $i") # If any data includes 0, it'll break here
             vline!(p, [method.summary(c)]; linecolour = i, linestyle = :dash, label=nothing)
         end
