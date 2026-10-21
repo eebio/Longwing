@@ -290,6 +290,7 @@ function read_data(file::AbstractString)
         error("Some channels in the channel map are not in a valid format. Channels should only contain letters, numbers, and underscores.")
     end
     sample_dict = OrderedDict()
+    process_groups_of_groups!(groups)
     group_dict = OrderedDict(i.Name => Dict(
         "sample_IDs" => lowercase.(expand_groups(i.Samples)),
         "type" => "experimental",
@@ -373,6 +374,23 @@ function read_data(file::AbstractString)
     metadata["channel_map"] = channel_map
     return OrderedDict("samples" => sample_dict, "groups" => group_dict,
         "transformations" => trans_dict, "views" => views_dict, "metadata" => metadata)
+end
+
+function process_groups_of_groups!(groups)
+    # Check for groups of groups and expand them
+    mapping = Dict{String,String}(i.Name => i.Samples for i in eachrow(groups))
+    while true
+        complete = true
+        for i in eachrow(groups)
+            if any(occursin.(keys(mapping), i.Samples))
+                complete = false
+                i.Samples = replace(i.Samples, mapping...)
+            end
+        end
+        if complete
+            break
+        end
+    end
 end
 
 function template_metadata(row, sample_type, channels)
@@ -492,7 +510,7 @@ function expand_groups(groups::AbstractString)
             push!(expanded, well)
         end
     end
-    return expanded
+    return unique(lowercase.(expanded))
 end
 
 function expand_flow_directories(samples)

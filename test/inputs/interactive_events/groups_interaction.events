@@ -28,7 +28,7 @@ EXPECT:New Group Name>
 TEXT:temporary_group
 ENTER
 EXPECT:New Group Samples>
-TEXT:plate_01_A1, plate_01_A2
+TEXT:plate_01_a1, plate_01_a2
 ENTER
 
 # Edit the new group.
@@ -43,7 +43,7 @@ DOWN
 ENTER
 EXPECT:Current samples for temporary_group
 EXPECT:New Group Samples>
-TEXT:plate_01_A3, plate_01_A4
+TEXT:plate_01_a3, plate_01_a4
 ENTER
 
 # Reopen it to verify that editing changed its samples.
@@ -57,7 +57,7 @@ DOWN
 DOWN
 ENTER
 EXPECT:Current samples for temporary_group
-EXPECT:plate_01_A3, plate_01_A4
+EXPECT:plate_01_a3, plate_01_a4
 EXPECT:New Group Samples>
 ENTER
 
