@@ -596,6 +596,7 @@ function expand_flow_directory(dir)
             end
         end
     end
+    isempty(filenames) && throw(TemplateError("No FCS files found in flow directory: $dir"))
     # Check for uniqueness of wells
     return filenames, wells, confirmations
 end
