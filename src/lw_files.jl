@@ -500,7 +500,6 @@ Iteratively call `expand_group` on a comma-separated list of group names.
 function expand_groups(groups::AbstractString)
     expanded = []
     # Split on commas not inside brackets
-    # Split on commas not inside brackets
     wells = split(groups, r",(?![^\[]*\])")
     for well in wells
         well = strip(well)
@@ -510,7 +509,14 @@ function expand_groups(groups::AbstractString)
             push!(expanded, well)
         end
     end
-    return unique(lowercase.(expanded))
+    expanded = unique(lowercase.(expanded))
+    # Validate well syntax
+    for id in expanded
+        if isnothing(match(r"^plate_\d\d_[a-z]\d+$", id))
+            error("Invalid well syntax in group expansion: group $groups produces $id which is not valid syntax.")
+        end
+    end
+    return expanded
 end
 
 function expand_flow_directories(samples)

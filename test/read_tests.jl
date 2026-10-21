@@ -773,3 +773,10 @@ end
     @test lw["groups"]["group2"]["metadata"]["Plate reader"] == true
     @test lw["groups"]["group3"]["metadata"]["Plate reader"] == false
 end
+
+@testitem "invalid group syntax" begin
+    # Test that invalid group syntax throws an error
+    @test_throws "Invalid well syntax in group expansion" Longwing.expand_groups("plate_01_[1:12]")
+    @test_throws "Invalid well syntax in group expansion" Longwing.expand_groups("plate_01_a[1:12], plate_01_b[1:12], plate_01_[1:12]")
+    @test_throws "Invalid well syntax in group expansion" Longwing.expand_groups("plate_01_a[1:12, 13, a]")
+end
