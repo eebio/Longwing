@@ -578,12 +578,12 @@ end
                           for i in keys(lw.transformations))
     out = Longwing.produce_views(lw, trans_meta_map)
 
-    @test issetequal(names(out["v1"]), ["plate_01_a1.700", "plate_01_a1.od"])
+    @test issetequal(names(out["v1"]), ["plate_01_a1.od2", "plate_01_a1.od"])
     @test issetequal(names(out["v2"]), ["plate_01_a1"])
-    @test issetequal(names(out["v3"]), Longwing.expand_groups("plate_01_[a,b][1:4].[700,od]"; error_check=false))
-    @test issetequal(names(out["v4"]), Longwing.expand_groups("plate_01_[a,b][1:4].[700,od]"; error_check=false))
-    @test issetequal(names(out["v5"]), Longwing.expand_groups("plate_01_[a,b][1:4].[700,od], plate_01_e[5:7].[700,od]"; error_check=false))
-    @test issetequal(names(out["v6"]), Longwing.expand_groups("plate_01_[a,b][1:4].[od,700,od_1,700_1], plate_01_e[5:7].[od,700,od_1,700_1],plate_01_time,plate_01_a1.[od_2,700_2],plate_01_[a,b][1:4],plate_01_a6.[od,700],plate_01_a7"; error_check=false))
+    @test issetequal(names(out["v3"]), Longwing.expand_groups("plate_01_[a,b][1:4].[od2,od]"; error_check=false))
+    @test issetequal(names(out["v4"]), Longwing.expand_groups("plate_01_[a,b][1:4].[od2,od]"; error_check=false))
+    @test issetequal(names(out["v5"]), Longwing.expand_groups("plate_01_[a,b][1:4].[od2,od], plate_01_e[5:7].[od2,od]"; error_check=false))
+    @test issetequal(names(out["v6"]), Longwing.expand_groups("plate_01_[a,b][1:4].[od,od2,od_1,od2_1], plate_01_e[5:7].[od,od2,od_1,od2_1],plate_01_time,plate_01_a1.[od_2,od2_2],plate_01_[a,b][1:4],plate_01_a6.[od,od2],plate_01_a7"; error_check=false))
 end
 
 @testitem "kw name collision" setup=[environment_path] begin
@@ -602,6 +602,7 @@ end
 @testitem "non-table views" setup=[environment_path] begin
     println("non-table views")
     dir = mktempdir()
+    @test !isfile("method.txt")
     cp("inputs/non_table_views.xlsx", joinpath(dir, "non_table_views.xlsx"))
     lw = read_data(joinpath(dir, "non_table_views.xlsx"))
     write_longwing(lw, joinpath(dir, "non_table_views.lw"))
@@ -619,6 +620,8 @@ end
     str = String(take!(io))
     @test contains(str, "Info: method = Longwing.Endpoints(10.0, 20.0)") ||
         contains(str, "Info: method = Endpoints(10.0, 20.0)")
+    @test isfile("method.txt")
+    rm("method.txt")
 end
 
 @testitem "to_rfi" begin
@@ -735,7 +738,7 @@ end
     lw = read_data("inputs/no-specified-channels.xlsx")
     @test "abs600" in keys(lw["samples"]["plate_01_a1"]["values"])
     @test "abs700" in keys(lw["samples"]["plate_01_a1"]["values"])
-    @test "535_485" in keys(lw["samples"]["plate_01_a1"]["values"])
+    @test "flu" in keys(lw["samples"]["plate_01_a1"]["values"])
     @test "FL1_A" in keys(lw["samples"]["plate_02_a1"]["values"])
 end
 
