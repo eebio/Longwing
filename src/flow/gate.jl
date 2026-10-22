@@ -25,8 +25,8 @@ function gate end
     channels::Vector{String}
     gate_frac::Float64 = 0.65
     nbins::Int64 = 1024
-    transform_x::Union{Function,Transform} = x -> x
-    transform_y::Union{Function,Transform} = y -> y
+    transform_x::Union{Function,Transform} = Logicle()
+    transform_y::Union{Function,Transform} = Logicle()
 end
 
 function gate(data, method::KDE)

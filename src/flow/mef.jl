@@ -91,7 +91,7 @@ end
     nInit::Int = 100
     nIter::Int = 100
     nRepeats::Int = 10
-    transform::Transform = Identity()
+    transform::Transform = Logicle()
 end
 
 function calibrate(df, method::MEF; plot_directory = nothing)

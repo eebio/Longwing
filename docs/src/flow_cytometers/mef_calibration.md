@@ -13,7 +13,7 @@ You can also provide some additional arguments to `MEF()` which have some defaul
 - `nInit=100` is the number of iterations of kmeans clustering to set the initial conditions for the Gaussian Mixture Models clustering.
 - `nIter=100` is the number of iterations of Expectation Maximisation for fine tuning the GMM.
 - `nRepeats=10` is the number of times the clustering is repeated (both kmeans and EM) with the final clustering being the one that maximises the likelihood.
-- `transform=Identity()` is a transform applied to the bead data before clustering. This can be useful if the bead peaks are not well separated on a linear scale. Any of the transforms from the [Transforms](@ref) page can be used, for example `MEF(..., transform=Logicle())`.
+- `transform=Logicle()` is a transform applied to the bead data before clustering. This can be useful if the bead peaks are not well separated on a linear scale. Any of the transforms from the [Transforms](@ref) page can be used, for example `MEF(..., transform=Hyperlog())`.
 
 You can also provide a `plot_directory` arguement to calibrate (`calibrate(df, MEF(...); plot_directory=...)`) to generate plots of the standard curve and histograms of the data, before and after clustering. You can provide a filepath where the plots will be saved, or `plot_directory=:temp`, in which case they will be saved to a temporary directory.
 
