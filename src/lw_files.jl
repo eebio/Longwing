@@ -225,7 +225,7 @@ end
 
 function untranslate_channel_map_rows(lw)
     stored_map = lw.metadata["channel_map"]
-    return [[string(source), string(target)] for (source, target) in stored_map]
+    return [[string(source), string(target)] for (source, target) in stored_map if string(source) != string(target)]
 end
 
 function untranslate_group_rows(lw)
