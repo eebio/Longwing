@@ -379,7 +379,8 @@ function _growth_rate(df, time_col, method::LinearOnLog; plot_directory=nothing,
         time=time_col[indexes, 1] ./ 60000, log_od=NaNMath.log.(df[indexes, 1] ./ first(df[:, 1])))
 
     # Weight residuals due to log scale warping noise
-    weights = df[indexes, 1] ./ first(df[:, 1])
+    lm_model = lm(@formula(log_od~time), lm_df)
+    weights = exp.(predict(lm_model))
     weights = weights .^ 2 ./ mean(weights .^ 2)
     lm_model = lm(@formula(log_od~time), lm_df; weights=aweights(weights))
     growth_rate = coef(lm_model)[2]
@@ -533,9 +534,6 @@ function _growth_rate(df, time_col, method::ParametricGrowthRate; plot_directory
         )
     end
 
-    weights = y ./ first(y)
-    weights = 1 ./ weights
-
     # initial guess: A ~ max(y), b small, c ~ end of time
     if method.lower_limit_flexible
         func = method.func
@@ -544,6 +542,12 @@ function _growth_rate(df, time_col, method::ParametricGrowthRate; plot_directory
         func = (p, t) -> method.func([p..., 0.0], t)
         u0 = method.initial_params[1:(end-1)]
     end
+
+    prob = NonlinearCurveFitProblem(func, u0, t, ly)
+    sol = solve(prob)
+
+    weights = exp.(predict(sol))
+    weights = 1 ./ weights
 
     prob = NonlinearCurveFitProblem(func, u0, t, ly, weights)
     sol = solve(prob)
@@ -670,8 +674,14 @@ function _growth_rate(df, time_col, method::SmoothedSpline; plot_directory=nothi
             "growth_rate_uncertainty" => NaN
         )
     end
+    if isnothing(method.knots)
+        spl = Dierckx.Spline1D(t, ly; k=method.order, s=method.smoothness)
+    else
+        spl = Dierckx.Spline1D(t, ly, method.knots; k=method.order)
+    end
+
     t_refined = range(first(t), last(t), length=100 * n)
-    weights = y ./ first(y)
+    weights = exp.(spl(t))
     weights = weights ./ mean(weights)
     if isnothing(method.knots)
         spl = Dierckx.Spline1D(t, ly; k=method.order, w=weights, s=method.smoothness)
@@ -700,6 +710,9 @@ function _growth_rate(df, time_col, method::SmoothedSpline; plot_directory=nothi
             resampled_residuals = sample(rng, residuals, n; replace=true) # add seeded rng
             new_data = fitted_values .+ resampled_residuals
             try
+                new_spl = Dierckx.Spline1D(t, new_data, knots; k=method.order)
+                weights = exp.(new_spl(t))
+                weights = weights ./ mean(weights)
                 new_spl = Dierckx.Spline1D(t, new_data, knots; k=method.order, w=weights)
                 new_deriv = Dierckx.derivative(new_spl, t_refined)
                 bootstrap_growth_rates[b] = maximum(new_deriv)
