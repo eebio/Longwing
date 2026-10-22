@@ -237,7 +237,7 @@ If we plot just residuals, you can see the variance is highest at early times, w
 plot(t, ly .- predict(model), label="Residuals")
 ```
 
-We can also look at our fit after transforming back from log(OD) to OD. 
+We can also look at our fit after transforming back from log(OD) to OD.
 
 The fitted line slightly underestimates the values at higher OD, because it weights the larger residuals at lower OD to be more important.
 
@@ -249,7 +249,7 @@ plot!(t, y, label="Noisy OD")
 We can repeat this whole process but instead using weighted least squares to account for how this changes the variance of the residuals.
 
 ```@example wls
-weights = y # Weight residuals by OD
+weights = exp.(predict(model)) # Weight residuals by OD
 weights = weights ./ sum(weights) .* length(weights) # Normalize weights into frequency weights
 model = lm(@formula(ly ~ t), df, weights=weights)
 
@@ -287,7 +287,7 @@ Then we can use the Taylor expansion of $\log(1+x) = x - \frac{x^2}{2} + \dots$,
 
 This is the form we fit our linear model in, and where $\varepsilon^\prime = \frac{\varepsilon}{A\exp(\mu t)}$ but ${A\exp(\mu t)}$ is just our fitted OD, $\widehat{OD}$.
 
-This means that $var(\varepsilon^\prime)=\frac{\sigma^2}{\widehat{OD}^2}$. Since we don't have access to the fitted $\widehat{OD}$, we instead use the noisy data $OD$. This is why we used weights of $y$ in the example above (then adjusted into frequency weights to ensure the correct effective sample size).
+This means that $var(\varepsilon^\prime)=\frac{\sigma^2}{\widehat{OD}^2}$. Since we don't have access to the fitted $\widehat{OD}$ during fitting, we instead run one round of fitting without weights, and use the fitted values as weights for a secondary round of fitting (while many iterations would further remove bias, one iteration is almost always sufficient given the bias introduced from the Taylor expansion of $\log(1+x)$). This is why we used `exp.(predict(model))` in the example above (then adjusted into frequency weights to ensure the correct effective sample size).
 
 We apply this weighting to all least squares calculations for growth rates. The weight is always $\frac{OD}{OD_0}$, since that is the value we log-transform. This applies for the parametric methods, LinearOnLog (and MovingWindow of LinearOnLog), ExpandingWindow, and smoothed splines.
 
