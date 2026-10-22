@@ -29,7 +29,7 @@ end
 @testsnippet environment_path begin
     println("environment path")
     if "GITHUB_WORKSPACE" ∉ keys(ENV)
-        ENV["GITHUB_WORKSPACE"] = pwd()*"/.."
+        ENV["GITHUB_WORKSPACE"] = joinpath(pwd(), "..")
     end
 end
 

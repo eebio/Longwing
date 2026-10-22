@@ -623,7 +623,7 @@ function validate_template(samples, groups, trans, views, channel_map)
         end
 
         # Invalid data location
-        isfile(row."Data Location") || contains(row."Data Location", "\$GITHUB_WORKSPACE") || throw(TemplateError("Data location does not exist: $(row."Data Location")"))
+        isfile(row."Data Location") || (isdir(row."Data Location") && lowercase(row.Type) == "plate reader" && lowercase(row."Plate brand") == "generic") || contains(row."Data Location", "\$GITHUB_WORKSPACE") || throw(TemplateError("Data location does not exist: $(row."Data Location")"))
 
         # Plate should be an integer
         row.Plate isa Integer || throw(TemplateError("Plate should be an integer."))
