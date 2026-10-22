@@ -225,7 +225,7 @@ end
 
 function untranslate_channel_map_rows(lw)
     stored_map = lw.metadata["channel_map"]
-    return [[string(source), string(target)] for (source, target) in stored_map]
+    return [[string(source), string(target)] for (source, target) in stored_map if string(source) != string(target)]
 end
 
 function untranslate_group_rows(lw)
@@ -277,17 +277,23 @@ function read_data(file::AbstractString)
     samples = expand_flow_directories(samples)
 
     # Extract data
-    samples = groupby(samples, :Plate)
     groups = DataFrame(XLSX.readtable(file, "Groups"; stop_in_empty_row=false))
     trans = DataFrame(XLSX.readtable(file, "Transformations"; stop_in_empty_row=false))
     views = DataFrame(XLSX.readtable(file, "Views"; stop_in_empty_row=false))
     channel_map = DataFrame(XLSX.readtable(file, "Channel Map"; stop_in_empty_row=false))
 
+    # Validate template file
+    validate_template(samples, groups, trans, views, channel_map)
+
+    samples = groupby(samples, :Plate)
+
     # Create the dict to show what channels need to be changed
     channel_map = Dict(string(i."Channel") => string(i."New name") for i in eachrow(channel_map)
                                                                        if !ismissing(i."Channel") && !ismissing(i."New name") && !isempty(string(i."Channel")))
-    if any(val != format_channel(val) for val in values(channel_map))
-        error("Some channels in the channel map are not in a valid format. Channels should only contain letters, numbers, and underscores.")
+    for val in values(channel_map)
+        if val != format_channel(val)
+            throw(TemplateError("Channel names must only contain letters, numbers, and underscores. Invalid channel name: $val. If this is the default name for the channel, it should be renamed using the channel map."))
+        end
     end
     sample_dict = OrderedDict()
     process_groups_of_groups!(groups)
@@ -311,8 +317,8 @@ function read_data(file::AbstractString)
             end
         end
         length(ins_type) == 1 ||
-            error("All experiments on one plate must be from the same instrument types. \
-            Instrument types used here are: $(Set(samples[i].Type))")
+            throw(TemplateError("All experiments on one plate must be from the same instrument types. \
+            Instrument types used here are: $(Set(samples[i].Type))"))
         # Process channels
         channels = String[]
         # Convert to string if not already
@@ -347,7 +353,7 @@ function read_data(file::AbstractString)
             sample_dict, broad_g = read_flow(
                 samples[i], sample_dict, channels, broad_g, channel_map)
         else
-            error("Unknown instrument type: $(first(ins_type))")
+            throw(TemplateError("Unknown instrument type: $(first(ins_type))"))
         end
 
         if "plate reader" in lowercase.(ins_type)
@@ -497,9 +503,8 @@ end
 
 Iteratively call `expand_group` on a comma-separated list of group names.
 """
-function expand_groups(groups::AbstractString)
+function expand_groups(groups::AbstractString; error_check=true)
     expanded = []
-    # Split on commas not inside brackets
     # Split on commas not inside brackets
     wells = split(groups, r",(?![^\[]*\])")
     for well in wells
@@ -510,7 +515,16 @@ function expand_groups(groups::AbstractString)
             push!(expanded, well)
         end
     end
-    return unique(lowercase.(expanded))
+    expanded = unique(lowercase.(expanded))
+    # Validate well syntax
+    if error_check
+        for id in expanded
+            if isnothing(match(r"^plate_\d\d_([a-z]\d+|time|temperature)$", id))
+                throw(TemplateError("Invalid well syntax in group expansion: group $groups produces $id which is not valid syntax."))
+            end
+        end
+    end
+    return expanded
 end
 
 function expand_flow_directories(samples)
@@ -563,7 +577,7 @@ function expand_flow_directory(dir)
                 # Try matching by allowing a leading 0 in the well number (e.g. A01 instead of A1)
                 m = match(r"(?i)(?<![a-z0-9])([a-z]\d+)(?![a-z0-9])", entry)
                 if isnothing(m)
-                    error("Could not extract well from filename: $entry")
+                    throw(TemplateError("Could not extract well from filename: $entry"))
                 end
             end
             well = lowercase(m.captures[1])
@@ -584,6 +598,92 @@ function expand_flow_directory(dir)
             end
         end
     end
+    isempty(filenames) && throw(TemplateError("No FCS files found in flow directory: $dir"))
     # Check for uniqueness of wells
     return filenames, wells, confirmations
+end
+
+struct TemplateError <: Exception
+    msg::String
+end
+
+Base.showerror(io::IO, e::TemplateError) = print(io, e.msg)
+
+function validate_template(samples, groups, trans, views, channel_map)
+    for row in eachrow(samples)
+        # Check for missing fields
+        ismissing(row.Type) && throw(TemplateError("Sample type is missing for one of the samples."))
+        ismissing(row."Data Location") && throw(TemplateError("Data location is missing for one of the samples."))
+        ismissing(row.Plate) && throw(TemplateError("Plate is missing for one of the samples."))
+        if lowercase(row.Type) == "flow"
+            ismissing(row.Well) && throw(TemplateError("Well is missing for one of the flow samples."))
+        end
+        if lowercase(row.Type) == "plate reader"
+            ismissing(row."Plate brand") && throw(TemplateError("Plate brand is missing for one of the plate reader samples."))
+        end
+
+        # Invalid data location
+        isfile(row."Data Location") || (isdir(row."Data Location") && lowercase(row.Type) == "plate reader" && lowercase(row."Plate brand") == "generic") || contains(row."Data Location", "\$GITHUB_WORKSPACE") || throw(TemplateError("Data location does not exist: $(row."Data Location")"))
+
+        # Plate should be an integer
+        row.Plate isa Integer || throw(TemplateError("Plate should be an integer."))
+    end
+    # Plate + well combinations should be unique for all samples
+    plate_well_combinations = [(row.Plate, row.Well) for row in eachrow(samples)]
+    length(plate_well_combinations) == length(unique(plate_well_combinations)) ||
+        throw(TemplateError("Plate + well combinations should be unique for all samples. You seem to be trying to write multiple peices of data to the same well."))
+
+    # Groups
+    for row in eachrow(groups)
+        ismissing(row.Name) && throw(TemplateError("Group name is missing for one of the groups."))
+        ismissing(row.Samples) && throw(TemplateError("Samples are missing for one of the groups."))
+        # Check the names are valid syntax
+        isnothing(match(r"^[a-zA-Z][a-zA-Z0-9_]*$", row.Name)) &&
+            throw(TemplateError("Group name $(row.Name) is invalid. Group names must start with a letter and can only contain letters, numbers, and underscores."))
+    end
+    groups.Name = string.(groups.Name)
+    groups.Samples = string.(groups.Samples)
+
+    # Transformations
+    for row in eachrow(trans)
+        ismissing(row.Name) && throw(TemplateError("Transformation name is missing for one of the transformations."))
+        ismissing(row.Equation) && throw(TemplateError("Transformation equation is missing for one of the transformations."))
+        # Check the names are valid syntax
+        isnothing(match(r"^[a-zA-Z][a-zA-Z0-9_]*$", row.Name)) &&
+            throw(TemplateError("Transformation name $(row.Name) is invalid. Transformation names must start with a letter and can only contain letters, numbers, and underscores."))
+        try
+            Meta.parse(string(row.Equation))
+        catch e
+            @warn "Transformation equation $(row.Equation) is invalid. It could not be parsed."
+            rethrow(e)
+        end
+    end
+    trans.Name = string.(trans.Name)
+    trans.Equation = string.(trans.Equation)
+
+    # Views
+    for row in eachrow(views)
+        ismissing(row.Name) && throw(TemplateError("View name is missing for one of the views."))
+        ismissing(row.View) && throw(TemplateError("View data is missing for one of the views."))
+        # Check the names are valid syntax
+        isnothing(match(r"^[a-zA-Z][a-zA-Z0-9_]*$", row.Name)) &&
+            throw(TemplateError("View name $(row.Name) is invalid. View names must start with a letter and can only contain letters, numbers, and underscores."))
+    end
+    views.Name = string.(views.Name)
+    views.View = string.(views.View)
+
+    for row in eachrow(channel_map)
+        ismissing(row."Channel") && throw(TemplateError("Channel name is missing for one of the channel map entries."))
+        ismissing(row."New name") && throw(TemplateError("New channel name is missing for one of the channel map entries."))
+        # Check the new names are valid syntax
+        isnothing(match(r"^[a-zA-Z][a-zA-Z0-9_]*$", row."New name")) &&
+            throw(TemplateError("New channel name $(row."New name") is invalid. New channel names must start with a letter and can only contain letters, numbers, and underscores."))
+        # Check the old name is in samples (or at least one of the samples has all channels (i.e. is empty))
+        if !any(ismissing.(samples.Channels))
+            possible_channels = strip.(split(join(samples.Channels, ","), ","))
+            row.Channel in possible_channels || throw(TemplateError("Channel $(row."Channel") is not present in any of the samples. Possible channels are: $(possible_channels)"))
+        end
+    end
+    channel_map."Channel" = string.(channel_map."Channel")
+    channel_map."New name" = string.(channel_map."New name")
 end

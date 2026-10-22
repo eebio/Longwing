@@ -28,7 +28,6 @@ end
     using JSON
     using StableHashTraits
     using SHA
-    using StableHashTraits
     @testset "Template integration" begin
         println("Template integration")
         dir = Base.Filesystem.mktempdir()

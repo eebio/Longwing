@@ -85,6 +85,9 @@ function read_multipr_file(file, ptype, channels, channel_map)
     end
     # Apply channel map
     o_dict = Dict(get(channel_map, k, k) => v for (k, v) in o_dict)
+    for k in keys(o_dict)
+        isnothing(match(r"^[a-zA-Z][a-zA-Z0-9_]*$", k)) && error("Channel name $k is not a valid channel name. Channel names should only contain letters, numbers, and underscores, starting with a letter. Please rename the channel in the channel map.")
+    end
     return o_dict, raw_metadata
 end
 

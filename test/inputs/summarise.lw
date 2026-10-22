@@ -18,20 +18,6 @@
       },
       "type": "timeseries",
       "values": {
-        "535_485": [
-          0.0,
-          902000.0,
-          1.804e6,
-          2.706e6,
-          3.608e6,
-          4.51e6,
-          5.412e6,
-          6.314e6,
-          7.216e6,
-          8.118e6,
-          9.02e6,
-          9.922e6
-        ],
         "abs600": [
           0.0,
           902000.0,
@@ -47,6 +33,20 @@
           9.922e6
         ],
         "abs700": [
+          0.0,
+          902000.0,
+          1.804e6,
+          2.706e6,
+          3.608e6,
+          4.51e6,
+          5.412e6,
+          6.314e6,
+          7.216e6,
+          8.118e6,
+          9.02e6,
+          9.922e6
+        ],
+        "flu": [
           0.0,
           902000.0,
           1.804e6,
@@ -80,20 +80,6 @@
       },
       "type": "timeseries",
       "values": {
-        "535_485": [
-          30.0,
-          30.0,
-          30.0,
-          30.0,
-          30.0,
-          30.0,
-          30.0,
-          30.0,
-          30.0,
-          30.0,
-          30.0,
-          30.0
-        ],
         "abs600": [
           30.0,
           30.0,
@@ -109,6 +95,20 @@
           30.0
         ],
         "abs700": [
+          30.0,
+          30.0,
+          30.0,
+          30.0,
+          30.0,
+          30.0,
+          30.0,
+          30.0,
+          30.0,
+          30.0,
+          30.0,
+          30.0
+        ],
+        "flu": [
           30.0,
           30.0,
           30.0,
@@ -142,20 +142,6 @@
       },
       "type": "timeseries",
       "values": {
-        "535_485": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
-        ],
         "abs600": [
           0.1603,
           0.2047,
@@ -183,6 +169,20 @@
           0.2776,
           0.3297,
           0.3629
+        ],
+        "flu": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
         ]
       }
     },
@@ -204,20 +204,6 @@
       },
       "type": "timeseries",
       "values": {
-        "535_485": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
-        ],
         "abs600": [
           0.1607,
           0.1606,
@@ -245,6 +231,20 @@
           0.3262,
           0.332,
           0.3456
+        ],
+        "flu": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
         ]
       }
     },
@@ -266,20 +266,6 @@
       },
       "type": "timeseries",
       "values": {
-        "535_485": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
-        ],
         "abs600": [
           0.1685,
           0.1573,
@@ -307,6 +293,20 @@
           0.426,
           0.4755,
           0.4932
+        ],
+        "flu": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
         ]
       }
     },
@@ -328,20 +328,6 @@
       },
       "type": "timeseries",
       "values": {
-        "535_485": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
-        ],
         "abs600": [
           0.1601,
           0.1998,
@@ -369,6 +355,20 @@
           0.4017,
           0.4209,
           0.4515
+        ],
+        "flu": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
         ]
       }
     },
@@ -390,20 +390,6 @@
       },
       "type": "timeseries",
       "values": {
-        "535_485": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
-        ],
         "abs600": [
           0.1675,
           0.2295,
@@ -431,6 +417,20 @@
           0.3301,
           0.3789,
           0.4057
+        ],
+        "flu": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
         ]
       }
     },
@@ -452,20 +452,6 @@
       },
       "type": "timeseries",
       "values": {
-        "535_485": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
-        ],
         "abs600": [
           0.1743,
           0.2043,
@@ -493,6 +479,20 @@
           0.3436,
           0.3652,
           0.4086
+        ],
+        "flu": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
         ]
       }
     },
@@ -514,20 +514,6 @@
       },
       "type": "timeseries",
       "values": {
-        "535_485": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
-        ],
         "abs600": [
           0.1723,
           0.2186,
@@ -555,6 +541,20 @@
           0.386,
           0.3965,
           0.4074
+        ],
+        "flu": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
         ]
       }
     },
@@ -576,20 +576,6 @@
       },
       "type": "timeseries",
       "values": {
-        "535_485": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
-        ],
         "abs600": [
           0.1723,
           0.1755,
@@ -617,6 +603,20 @@
           0.4214,
           0.4421,
           0.4802
+        ],
+        "flu": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
         ]
       }
     },
@@ -638,20 +638,6 @@
       },
       "type": "timeseries",
       "values": {
-        "535_485": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
-        ],
         "abs600": [
           0.1765,
           0.1898,
@@ -679,6 +665,20 @@
           0.3659,
           0.3762,
           0.3969
+        ],
+        "flu": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
         ]
       }
     },
@@ -700,20 +700,6 @@
       },
       "type": "timeseries",
       "values": {
-        "535_485": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
-        ],
         "abs600": [
           0.1834,
           0.2105,
@@ -741,6 +727,20 @@
           0.3966,
           0.4487,
           0.5085
+        ],
+        "flu": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
         ]
       }
     },
@@ -762,20 +762,6 @@
       },
       "type": "timeseries",
       "values": {
-        "535_485": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
-        ],
         "abs600": [
           0.1753,
           0.2053,
@@ -803,6 +789,20 @@
           0.4482,
           0.502,
           0.5132
+        ],
+        "flu": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
         ]
       }
     },
@@ -824,20 +824,6 @@
       },
       "type": "timeseries",
       "values": {
-        "535_485": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
-        ],
         "abs600": [
           0.1853,
           0.205,
@@ -865,6 +851,20 @@
           0.3555,
           0.3745,
           0.4289
+        ],
+        "flu": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
         ]
       }
     },
@@ -886,20 +886,6 @@
       },
       "type": "timeseries",
       "values": {
-        "535_485": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
-        ],
         "abs600": [
           0.1634,
           0.2336,
@@ -927,6 +913,20 @@
           0.3968,
           0.4308,
           0.4886
+        ],
+        "flu": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
         ]
       }
     },
@@ -948,20 +948,6 @@
       },
       "type": "timeseries",
       "values": {
-        "535_485": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
-        ],
         "abs600": [
           0.1843,
           0.2039,
@@ -989,6 +975,20 @@
           0.3926,
           0.4435,
           0.4808
+        ],
+        "flu": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
         ]
       }
     },
@@ -1241,7 +1241,7 @@
     "Manifest.toml": "",
     "Project.toml": "",
     "channel_map": {
-      "535_485": "535_485",
+      "535_485": "flu",
       "600": "abs600",
       "700": "abs700",
       "FSC_H": "FSC_H"
