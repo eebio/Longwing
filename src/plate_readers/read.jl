@@ -467,9 +467,22 @@ function Base.read(file::AbstractString, ::GenericTabular; channels = nothing)
             continue
         end
         df = CSV.read(joinpath(file, j), DataFrame)
-        df[!, "time"] = [hour(t) * 3600 * 1000 + minute(t) * 60 * 1000 + second(t) * 1000 +
-                         millisecond(t) for t in df[!, "time"]]
+        df[!, "time"] = parse_time.(df[!, "time"])
         out[channel] = df
     end
     return out, ""
+end
+
+function parse_time(time_str::AbstractString)
+    h, m, s = split(time_str, ":")
+    if contains(s, ".")
+        s, ms = split(s, ".")
+        return parse(Int, h) * 3600 * 1000 + parse(Int, m) * 60 * 1000 + parse(Int, s) * 1000 + parse(Int, ms)
+    end
+    return parse(Int, h) * 3600 * 1000 + parse(Int, m) * 60 * 1000 + parse(Int, s) * 1000
+end
+
+function parse_time(t::Dates.AbstractTime)
+    return hour(t) * 3600 * 1000 + minute(t) * 60 * 1000 + second(t) * 1000 +
+        millisecond(t)
 end
