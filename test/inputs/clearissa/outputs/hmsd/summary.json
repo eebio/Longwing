@@ -1,0 +1,24 @@
+{
+  "beta": 0.245833868912019,
+  "beta_calculation": {
+    "method": "runtime_controls",
+    "mean_donor_signal_AFU": 35873.27777777778,
+    "mean_product_signal_AFU": 8818.866666666667,
+    "n_donor_controls": 1,
+    "n_product_controls": 4,
+    "init_window": [
+      0.0,
+      40.0
+    ]
+  },
+  "mean_S1_T_0_nM": 11.033422604002466,
+  "std_S1_T_0_nM": 0.5162587108073393,
+  "donor_ctrl_concentration_nM": 10.0,
+  "failed_wells": [],
+  "n_successful": 17,
+  "n_failed": 0,
+  "posctrl_warning": null,
+  "total_points_clipped_low": 0,
+  "mean_clipped_low_per_well": 0.0,
+  "percent_clipped_low": 0.0
+}
