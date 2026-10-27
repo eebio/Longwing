@@ -36,6 +36,9 @@ export calibrate
 export at_time, at, between_times, between
 export TimeseriesBlank, SmoothedTimeseriesBlank, MeanBlank, MinBlank, MinData, StartData
 
+export quantification
+export TMSD, HMSD, InternalTMSD, RelativeFluorescence
+
 export gate, event_count, gated_proportion
 export HighLowGate, RectangleGate, QuadrantGate, PolygonGate, EllipseGate
 export and, or, not
