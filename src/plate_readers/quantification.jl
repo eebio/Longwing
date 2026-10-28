@@ -202,20 +202,13 @@ function quantification(data_fl, time_fl, method::RelativeFluorescence; plot_dir
     negative_controls = calibrate(method.negative_controls, time_fl, TimeseriesBlank(method.blank, time_fl))
     p_corr = calculate_p_corr(method.positive_controls, method.blank, time_fl, method.init_time, method.positive_control_concentrations, method.concentration_reference)
 
-    # h_neg,base = mean(h_neg(t))
-    h_neg = deepcopy(negative_controls)
-    for name in names(h_neg)
-        f_raw_neg = negative_controls[!, name]
-        g = f_raw_neg ./ p_corr # Timeseries blank calibration on fraw
-        h_neg[!, name] = g .* method.concentration_reference
-    end
-    h_neg_base = mean_in_window(h_neg, time_fl, method.stable_neg_time)
-    h_neg_base = mean(skipmissing(h_neg_base[1, :])) # average over negative controls
+    f_neg_base = mean_in_window(negative_controls, time_fl, method.stable_neg_time)
+    f_neg_base = mean(skipmissing(f_neg_base[1, :])) # average over negative controls
 
     out = deepcopy(calibrated_data_fl)
     for name in names(calibrated_data_fl)
         f_raw = calibrated_data_fl[!, name]
-        out[!, name] = (f_raw .- h_neg_base) ./ (p_corr .- h_neg_base)
+        out[!, name] = (f_raw .- f_neg_base) ./ (p_corr .- f_neg_base)
     end
 
     if !isnothing(plot_directory)
