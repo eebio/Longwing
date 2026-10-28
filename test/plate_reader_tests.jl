@@ -995,6 +995,10 @@ end
 @testitem "quantification" begin
     println("quantification")
     using DataFrames, CSV
+
+    atol = 1e-12
+    rtol = 1e-14
+
     data = read("inputs/clearissa/tmsd", GenericTabular())[1]
     tmsd = data["tmsd"]
     rename!(tmsd, Dict(i => "plate_01_$(lowercase(i))" for i in names(tmsd)))
@@ -1008,17 +1012,17 @@ end
         blank=blank,
         positive_controls=positive_controls,
         init_time=(0.0, 20.0),
-        saturation_time=(2577.0, 2605.0), # techincally results are made with nuking time of 2605
+        saturation_time=(2589.0, 2605.0), # techincally results are made with nuking time of 2605
         positive_control_concentrations=Dict("plate_01_b8" => 5.0, "plate_01_b9" => 10.0, "plate_01_b10" => 15.0, "plate_01_b11" => 20.0),
         concentration_reference=10.0); plot_directory = ".") # I don't think the concentration reference matters for tmsd
     clearissa_df = CSV.read("inputs/clearissa/outputs/tmsd/Product [AB] Concentration [nM].csv", DataFrame)
     dropmissing!(clearissa_df)
     dropmissing!(calibrated_df)
-    @test calibrated_df[:, "plate_01_a1"] ≈ clearissa_df[:, "A01"] atol = 1e-4 rtol = 1e-3
-    @test calibrated_df[:, "plate_01_a2"] ≈ clearissa_df[:, "A02"] atol = 1e-4 rtol = 1e-3
-    @test calibrated_df[:, "plate_01_a12"] ≈ clearissa_df[:, "A12"] atol = 1e-4 rtol = 1e-3
-    @test calibrated_df[:, "plate_01_b1"] ≈ clearissa_df[:, "B01"] atol = 1e-4 rtol = 1e-3
-    @test calibrated_df[:, "plate_01_b6"] ≈ clearissa_df[:, "B06"] atol = 1e-4 rtol = 1e-3
+    @test calibrated_df[:, "plate_01_a1"] ≈ clearissa_df[:, "A01"] atol=atol rtol=rtol
+    @test calibrated_df[:, "plate_01_a2"] ≈ clearissa_df[:, "A02"] atol=atol rtol=rtol
+    @test calibrated_df[:, "plate_01_a12"] ≈ clearissa_df[:, "A12"] atol=atol rtol=rtol
+    @test calibrated_df[:, "plate_01_b1"] ≈ clearissa_df[:, "B01"] atol=atol rtol=rtol
+    @test calibrated_df[:, "plate_01_b6"] ≈ clearissa_df[:, "B06"] atol=atol rtol=rtol
     @test isfile(joinpath(pwd(), "quantification_tmsd.png"))
     rm(joinpath(pwd(), "quantification_tmsd.png"), force=true)
 
@@ -1042,11 +1046,11 @@ end
     clearissa_df = CSV.read("inputs/clearissa/outputs/hmsd/Product [S1-T-R1] Concentration [nM].csv", DataFrame)
     dropmissing!(clearissa_df)
     dropmissing!(calibrated_df)
-    @test calibrated_df[:, "plate_01_e2"] ≈ clearissa_df[:, "E02"] atol = 1e-4 rtol = 1e-3
-    @test calibrated_df[:, "plate_01_e3"] ≈ clearissa_df[:, "E03"] atol = 1e-4 rtol = 1e-3
-    @test calibrated_df[:, "plate_01_e12"] ≈ clearissa_df[:, "E12"] atol = 1e-4 rtol = 1e-3
-    @test calibrated_df[:, "plate_01_f1"] ≈ clearissa_df[:, "F01"] atol = 1e-4 rtol = 1e-3
-    @test calibrated_df[:, "plate_01_f6"] ≈ clearissa_df[:, "F06"] atol = 1e-4 rtol = 1e-3
+    @test calibrated_df[:, "plate_01_e2"] ≈ clearissa_df[:, "E02"] atol=atol rtol=rtol
+    @test calibrated_df[:, "plate_01_e3"] ≈ clearissa_df[:, "E03"] atol=atol rtol=rtol
+    @test calibrated_df[:, "plate_01_e12"] ≈ clearissa_df[:, "E12"] atol=atol rtol=rtol
+    @test calibrated_df[:, "plate_01_f1"] ≈ clearissa_df[:, "F01"] atol=atol rtol=rtol
+    @test calibrated_df[:, "plate_01_f6"] ≈ clearissa_df[:, "F06"] atol=atol rtol=rtol
     @test isfile(joinpath(pwd(), "quantification_hmsd.png"))
     rm(joinpath(pwd(), "quantification_hmsd.png"), force=true)
 
@@ -1065,20 +1069,20 @@ end
         positive_controls=positive_controls,
         negative_controls=negative_controls,
         init_time=(0.0, 40.0),
-        saturation_time=(2964.0, 3416.0),
+        saturation_time=(3386.0, 3401.1),
         stable_neg_time=(100.0, 120.0),
         positive_control_concentrations=Dict("plate_01_g1" => 5.0, "plate_01_g2" => 10.0, "plate_01_g3" => 15.0, "plate_01_g4" => 20.0),
-        concentration_reference=10.0); plot_directory=".")
+        concentration_reference=10.0,
+        trigger_time=44.0); plot_directory=".")
     clearissa_df = CSV.read("inputs/clearissa/outputs/internal_tmsd/Product [ABF] Concentration [nM].csv", DataFrame)
     dropmissing!(clearissa_df)
-    calibrated_df = calibrated_df[20:end, :]
     dropmissing!(calibrated_df)
     # Product missing in initial phase of clearissa output
-    @test calibrated_df[:, "plate_01_b8"] ≈ clearissa_df[:, "B08"] atol = 1e-4 rtol = 1e-3
-    @test calibrated_df[:, "plate_01_b9"] ≈ clearissa_df[:, "B09"] atol = 1e-4 rtol = 1e-3
-    @test calibrated_df[:, "plate_01_b12"] ≈ clearissa_df[:, "B12"] atol = 1e-4 rtol = 1e-3
-    @test calibrated_df[:, "plate_01_c1"] ≈ clearissa_df[:, "C01"] atol = 1e-4 rtol = 1e-3
-    @test calibrated_df[:, "plate_01_c12"] ≈ clearissa_df[:, "C12"] atol = 1e-4 rtol = 1e-3
+    @test calibrated_df[:, "plate_01_b8"] ≈ clearissa_df[:, "B08"] atol=atol rtol=rtol
+    @test calibrated_df[:, "plate_01_b9"] ≈ clearissa_df[:, "B09"] atol=atol rtol=rtol
+    @test calibrated_df[:, "plate_01_b12"] ≈ clearissa_df[:, "B12"] atol=atol rtol=rtol
+    @test calibrated_df[:, "plate_01_c1"] ≈ clearissa_df[:, "C01"] atol=atol rtol=rtol
+    @test calibrated_df[:, "plate_01_c12"] ≈ clearissa_df[:, "C12"] atol=atol rtol=rtol
     @test isfile(joinpath(pwd(), "quantification_internal_tmsd.png"))
     rm(joinpath(pwd(), "quantification_internal_tmsd.png"), force=true)
 
@@ -1103,11 +1107,11 @@ end
     clearissa_df = CSV.read("inputs/clearissa/outputs/relative/Relative Fluorescence RF(t).csv", DataFrame)
     dropmissing!(clearissa_df)
     dropmissing!(calibrated_df)
-    @test calibrated_df[:, "plate_01_d2"] ≈ clearissa_df[:, "D02"] atol = 1e-4 rtol = 1e-3
-    @test calibrated_df[:, "plate_01_d3"] ≈ clearissa_df[:, "D03"] atol = 1e-4 rtol = 1e-3
-    @test calibrated_df[:, "plate_01_d10"] ≈ clearissa_df[:, "D10"] atol = 1e-4 rtol = 1e-3
-    @test calibrated_df[:, "plate_01_e1"] ≈ clearissa_df[:, "E01"] atol = 1e-4 rtol = 1e-3
-    @test calibrated_df[:, "plate_01_e5"] ≈ clearissa_df[:, "E05"] atol = 1e-4 rtol = 1e-3
+    @test calibrated_df[:, "plate_01_d2"] ≈ clearissa_df[:, "D02"] atol=atol rtol=rtol
+    @test calibrated_df[:, "plate_01_d3"] ≈ clearissa_df[:, "D03"] atol=atol rtol=rtol
+    @test calibrated_df[:, "plate_01_d10"] ≈ clearissa_df[:, "D10"] atol=atol rtol=rtol
+    @test calibrated_df[:, "plate_01_e1"] ≈ clearissa_df[:, "E01"] atol=atol rtol=rtol
+    @test calibrated_df[:, "plate_01_e5"] ≈ clearissa_df[:, "E05"] atol=atol rtol=rtol
     @test isfile(joinpath(pwd(), "quantification_relative.png"))
     rm(joinpath(pwd(), "quantification_relative.png"), force=true)
 end
