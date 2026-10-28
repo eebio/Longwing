@@ -1096,8 +1096,8 @@ end
         blank=blank,
         positive_controls=positive_controls,
         negative_controls=negative_controls,
-        init_time=(0.0, 40.0),
-        stable_neg_time=(100.0, 120.0),
+        init_time=(0.0, 20.0),
+        stable_neg_time=(0.0, 20.0),
         positive_control_concentrations=Dict("plate_01_e8" => 5.0, "plate_01_e9" => 10.0, "plate_01_e10" => 15.0, "plate_01_e11" => 20.0),
         concentration_reference=10.0); plot_directory=".")
     clearissa_df = CSV.read("inputs/clearissa/outputs/relative/Relative Fluorescence RF(t).csv", DataFrame)
