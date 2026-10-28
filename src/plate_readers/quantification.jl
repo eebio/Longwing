@@ -129,6 +129,7 @@ end
     stable_neg_time::Tuple{Float64, Float64}
     positive_control_concentrations::Dict{String, Float64}
     concentration_reference::Float64
+    trigger_time::Float64
 end
 
 function quantification(data_fl, time_fl, method::InternalTMSD; plot_directory=nothing)
@@ -173,7 +174,8 @@ function quantification(data_fl, time_fl, method::InternalTMSD; plot_directory=n
     for name in names(h)
         h[!, name] = (h[!, name] .- beta .* c[!, name]) ./ (1 .- beta)
     end
-
+    # Remove pre-trigger values as conversion is not valid before trigger time
+    h = between_times(h, time_fl, mint=method.trigger_time)
     if !isnothing(plot_directory)
         p = plot()
         for col in names(h)
