@@ -1071,6 +1071,7 @@ end
         concentration_reference=10.0); plot_directory=".")
     clearissa_df = CSV.read("inputs/clearissa/outputs/internal_tmsd/Product [ABF] Concentration [nM].csv", DataFrame)
     dropmissing!(clearissa_df)
+    calibrated_df = calibrated_df[20:end, :]
     dropmissing!(calibrated_df)
     # Product missing in initial phase of clearissa output
     @test calibrated_df[:, "plate_01_b8"] ≈ clearissa_df[:, "B08"] atol = 1e-4 rtol = 1e-3
