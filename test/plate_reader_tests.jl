@@ -1008,13 +1008,14 @@ end
     blank = tmsd[!, ["plate_01_b12"]]
 
     @test !isfile(joinpath(pwd(), "quantification_tmsd.png"))
-    calibrated_df = quantification(data_fl, time_col, TMSD(
-        blank=blank,
-        positive_controls=positive_controls,
-        init_time=(0.0, 20.0),
-        saturation_time=(2589.0, 2605.0), # techincally results are made with nuking time of 2605
-        positive_control_concentrations=Dict("plate_01_b8" => 5.0, "plate_01_b9" => 10.0, "plate_01_b10" => 15.0, "plate_01_b11" => 20.0),
-        concentration_reference=10.0); plot_directory = ".") # I don't think the concentration reference matters for tmsd
+    calibrated_df = quantification(data_fl, time_col,
+        TMSD(
+            blank=blank,
+            positive_controls=positive_controls,
+            init_time=(0.0, 20.0),
+            saturation_time=(2589.0, 2605.0), # Results are made with nuking time of 2605, but Clearissa rounds to nearest timepoint
+            positive_control_concentrations=Dict("plate_01_b8" => 5.0, "plate_01_b9" => 10.0, "plate_01_b10" => 15.0, "plate_01_b11" => 20.0),
+        ); plot_directory=".")
     clearissa_df = CSV.read("inputs/clearissa/outputs/tmsd/Product [AB] Concentration [nM].csv", DataFrame)
     dropmissing!(clearissa_df)
     dropmissing!(calibrated_df)
@@ -1072,7 +1073,6 @@ end
         saturation_time=(3386.0, 3401.1),
         stable_neg_time=(100.0, 120.0),
         positive_control_concentrations=Dict("plate_01_g1" => 5.0, "plate_01_g2" => 10.0, "plate_01_g3" => 15.0, "plate_01_g4" => 20.0),
-        concentration_reference=10.0,
         trigger_time=44.0); plot_directory=".")
     clearissa_df = CSV.read("inputs/clearissa/outputs/internal_tmsd/Product [ABF] Concentration [nM].csv", DataFrame)
     dropmissing!(clearissa_df)

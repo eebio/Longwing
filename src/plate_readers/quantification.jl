@@ -274,7 +274,6 @@ which is used to compute the final product concentration per well.
     saturation_time::Tuple{Float64, Float64}
     stable_neg_time::Tuple{Float64, Float64}
     positive_control_concentrations::Dict{String, Float64}
-    concentration_reference::Float64
     trigger_time::Float64
 end
 
