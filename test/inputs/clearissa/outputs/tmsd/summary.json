@@ -1,0 +1,21 @@
+{
+  "AB_min_nM": -0.24064331652197474,
+  "AB_mean_nM": 3.6521804984305115,
+  "AB_max_nM": 10.19967208422261,
+  "Ax_0_mean_nM": 9.285177809343663,
+  "Ax_0_std_nM": 0.35078929507725587,
+  "beta_mean": 0.23289413892275046,
+  "beta_std": 0.008380752106895725,
+  "oversaturation_window": [
+    2589.9,
+    2604.85
+  ],
+  "init_window": [
+    0.0,
+    20.0
+  ],
+  "n_successful": 18,
+  "n_failed": 0,
+  "failed_wells": [],
+  "posctrl_warning": null
+}

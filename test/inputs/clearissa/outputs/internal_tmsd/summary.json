@@ -1,0 +1,23 @@
+{
+  "ABF_min_nM": -1.531506127591488,
+  "ABF_mean_nM": 5.01121427244029,
+  "ABF_max_nM": 8.564867807770563,
+  "ABT_0_median_nM": 7.935312437470424,
+  "ABT_0_mean_nM": 7.96015899170849,
+  "ABT_0_std_nM": 0.17319815903778196,
+  "beta_global": 0.1539645814625991,
+  "h_neg_base_nM": 1.2217570582100907,
+  "trigger_time": 44.02,
+  "oversaturation_window": [
+    3386.33,
+    3401.03
+  ],
+  "neg_ctrl_window": [
+    100.0,
+    120.0
+  ],
+  "n_successful": 17,
+  "n_failed": 0,
+  "failed_wells": [],
+  "posctrl_warning": null
+}

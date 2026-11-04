@@ -1,0 +1,16 @@
+{
+  "RF_min": -0.020349747199568474,
+  "RF_mean": 0.6873312931421106,
+  "RF_max": 1.3484641094299885,
+  "f_neg_base_AFU": 7533.153846153846,
+  "neg_ctrl_window": [
+    0.0,
+    20.0
+  ],
+  "n_successful": 14,
+  "n_failed": 0,
+  "failed_wells": [],
+  "wells_with_high_negatives": [],
+  "posctrl_warning": null,
+  "fraction_negative_values": 0.0009204712812960235
+}

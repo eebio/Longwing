@@ -991,3 +991,127 @@ end
     @test smooth(data, time_col, MovingTimeAverage(window_size=2)) ≈
         DataFrame(A=[0.575, 0.6925, 0.75666, 0.75666, 0.95], B=[1.08, 1.1875, 1.21333, 1.21333, 1.44]) atol = 1e-4
 end
+
+@testitem "quantification" begin
+    println("quantification")
+    using DataFrames, CSV
+
+    atol = 1e-12
+    rtol = 1e-14
+
+    data = read("inputs/clearissa/tmsd", GenericTabular())[1]
+    tmsd = data["tmsd"]
+    rename!(tmsd, Dict(i => "plate_01_$(lowercase(i))" for i in names(tmsd)))
+    time_col = tmsd[!, ["plate_01_time"]]
+    data_fl = tmsd[!, Longwing.expand_groups("plate_01_a[1:12], plate_01_b[1:6]")]
+    positive_controls = tmsd[!, Longwing.expand_groups("plate_01_b[8:11]")]
+    blank = tmsd[!, ["plate_01_b12"]]
+
+    @test !isfile(joinpath(pwd(), "quantification_tmsd.png"))
+    calibrated_df = quantification(data_fl, time_col,
+        TMSD(
+            blank=blank,
+            positive_controls=positive_controls,
+            init_time=(0.0, 20.0),
+            saturation_time=(2589.0, 2605.0), # Results are made with nuking time of 2605, but Clearissa rounds to nearest timepoint
+            positive_control_concentrations=Dict("plate_01_b8" => 5.0, "plate_01_b9" => 10.0, "plate_01_b10" => 15.0, "plate_01_b11" => 20.0),
+        ); plot_directory=".")
+    clearissa_df = CSV.read("inputs/clearissa/outputs/tmsd/Product [AB] Concentration [nM].csv", DataFrame)
+    dropmissing!(clearissa_df)
+    dropmissing!(calibrated_df)
+    @test calibrated_df[:, "plate_01_a1"] ≈ clearissa_df[:, "A01"] atol=atol rtol=rtol
+    @test calibrated_df[:, "plate_01_a2"] ≈ clearissa_df[:, "A02"] atol=atol rtol=rtol
+    @test calibrated_df[:, "plate_01_a12"] ≈ clearissa_df[:, "A12"] atol=atol rtol=rtol
+    @test calibrated_df[:, "plate_01_b1"] ≈ clearissa_df[:, "B01"] atol=atol rtol=rtol
+    @test calibrated_df[:, "plate_01_b6"] ≈ clearissa_df[:, "B06"] atol=atol rtol=rtol
+    @test isfile(joinpath(pwd(), "quantification_tmsd.png"))
+    rm(joinpath(pwd(), "quantification_tmsd.png"), force=true)
+
+    data = read("inputs/clearissa/hmsd", GenericTabular())[1]
+    hmsd = data["hmsd"]
+    rename!(hmsd, Dict(i => "plate_01_$(lowercase(i))" for i in names(hmsd)))
+    time_col = hmsd[!, ["plate_01_time"]]
+    data_fl = hmsd[!, Longwing.expand_groups("plate_01_e[2:12], plate_01_f[1:6]")]
+    positive_controls = hmsd[!, Longwing.expand_groups("plate_01_f[8:11]")]
+    blank = hmsd[!, ["plate_01_f12"]]
+    donor_reference = hmsd[!, ["plate_01_e1"]]
+
+    @test !isfile(joinpath(pwd(), "quantification_hmsd.png"))
+    calibrated_df = quantification(data_fl, time_col, HMSD(
+        blank=blank,
+        positive_controls=positive_controls,
+        reference=donor_reference,
+        init_time=(0.0, 40.0),
+        positive_control_concentrations=Dict("plate_01_f8" => 5.0, "plate_01_f9" => 10.0, "plate_01_f10" => 15.0, "plate_01_f11" => 20.0),
+        concentration_reference=10.0); plot_directory=".")
+    clearissa_df = CSV.read("inputs/clearissa/outputs/hmsd/Product [S1-T-R1] Concentration [nM].csv", DataFrame)
+    dropmissing!(clearissa_df)
+    dropmissing!(calibrated_df)
+    @test calibrated_df[:, "plate_01_e2"] ≈ clearissa_df[:, "E02"] atol=atol rtol=rtol
+    @test calibrated_df[:, "plate_01_e3"] ≈ clearissa_df[:, "E03"] atol=atol rtol=rtol
+    @test calibrated_df[:, "plate_01_e12"] ≈ clearissa_df[:, "E12"] atol=atol rtol=rtol
+    @test calibrated_df[:, "plate_01_f1"] ≈ clearissa_df[:, "F01"] atol=atol rtol=rtol
+    @test calibrated_df[:, "plate_01_f6"] ≈ clearissa_df[:, "F06"] atol=atol rtol=rtol
+    @test isfile(joinpath(pwd(), "quantification_hmsd.png"))
+    rm(joinpath(pwd(), "quantification_hmsd.png"), force=true)
+
+    data = read("inputs/clearissa/internal_tmsd", GenericTabular())[1]
+    internal_tmsd = data["internal_tmsd"]
+    rename!(internal_tmsd, Dict(i => "plate_01_$(lowercase(i))" for i in names(internal_tmsd)))
+    time_col = internal_tmsd[!, ["plate_01_time"]]
+    data_fl = internal_tmsd[!, Longwing.expand_groups("plate_01_b[8:12], plate_01_c[1:12]")]
+    positive_controls = internal_tmsd[!, Longwing.expand_groups("plate_01_g[1:4]")]
+    blank = internal_tmsd[!, ["plate_01_g5"]]
+    negative_controls = internal_tmsd[!, ["plate_01_b7"]]
+
+    @test !isfile(joinpath(pwd(), "quantification_internal_tmsd.png"))
+    calibrated_df = quantification(data_fl, time_col, InternalTMSD(
+        blank=blank,
+        positive_controls=positive_controls,
+        negative_controls=negative_controls,
+        init_time=(0.0, 40.0),
+        saturation_time=(3386.0, 3401.1),
+        stable_neg_time=(100.0, 120.0),
+        positive_control_concentrations=Dict("plate_01_g1" => 5.0, "plate_01_g2" => 10.0, "plate_01_g3" => 15.0, "plate_01_g4" => 20.0),
+        trigger_time=44.0); plot_directory=".")
+    clearissa_df = CSV.read("inputs/clearissa/outputs/internal_tmsd/Product [ABF] Concentration [nM].csv", DataFrame)
+    dropmissing!(clearissa_df)
+    dropmissing!(calibrated_df)
+    # Product missing in initial phase of clearissa output
+    @test calibrated_df[:, "plate_01_b8"] ≈ clearissa_df[:, "B08"] atol=atol rtol=rtol
+    @test calibrated_df[:, "plate_01_b9"] ≈ clearissa_df[:, "B09"] atol=atol rtol=rtol
+    @test calibrated_df[:, "plate_01_b12"] ≈ clearissa_df[:, "B12"] atol=atol rtol=rtol
+    @test calibrated_df[:, "plate_01_c1"] ≈ clearissa_df[:, "C01"] atol=atol rtol=rtol
+    @test calibrated_df[:, "plate_01_c12"] ≈ clearissa_df[:, "C12"] atol=atol rtol=rtol
+    @test isfile(joinpath(pwd(), "quantification_internal_tmsd.png"))
+    rm(joinpath(pwd(), "quantification_internal_tmsd.png"), force=true)
+
+    data = read("inputs/clearissa/relative", GenericTabular())[1]
+    relative = data["relative"]
+    rename!(relative, Dict(i => "plate_01_$(lowercase(i))" for i in names(relative)))
+    time_col = relative[!, ["plate_01_time"]]
+    data_fl = relative[!, Longwing.expand_groups("plate_01_d[2:10], plate_01_e[1:5]")]
+    positive_controls = relative[!, Longwing.expand_groups("plate_01_e[8:11]")]
+    blank = relative[!, ["plate_01_e12"]]
+    negative_controls = relative[!, ["plate_01_d1"]]
+
+    @test !isfile(joinpath(pwd(), "quantification_relative.png"))
+    calibrated_df = quantification(data_fl, time_col, RelativeFluorescence(
+        blank=blank,
+        positive_controls=positive_controls,
+        negative_controls=negative_controls,
+        init_time=(0.0, 20.0),
+        stable_neg_time=(0.0, 20.0),
+        positive_control_concentrations=Dict("plate_01_e8" => 5.0, "plate_01_e9" => 10.0, "plate_01_e10" => 15.0, "plate_01_e11" => 20.0),
+        concentration_reference=10.0); plot_directory=".")
+    clearissa_df = CSV.read("inputs/clearissa/outputs/relative/Relative Fluorescence RF(t).csv", DataFrame)
+    dropmissing!(clearissa_df)
+    dropmissing!(calibrated_df)
+    @test calibrated_df[:, "plate_01_d2"] ≈ clearissa_df[:, "D02"] atol=atol rtol=rtol
+    @test calibrated_df[:, "plate_01_d3"] ≈ clearissa_df[:, "D03"] atol=atol rtol=rtol
+    @test calibrated_df[:, "plate_01_d10"] ≈ clearissa_df[:, "D10"] atol=atol rtol=rtol
+    @test calibrated_df[:, "plate_01_e1"] ≈ clearissa_df[:, "E01"] atol=atol rtol=rtol
+    @test calibrated_df[:, "plate_01_e5"] ≈ clearissa_df[:, "E05"] atol=atol rtol=rtol
+    @test isfile(joinpath(pwd(), "quantification_relative.png"))
+    rm(joinpath(pwd(), "quantification_relative.png"), force=true)
+end
