@@ -9,9 +9,11 @@ abstract type AbstractQuantificationMethod <: AbstractPlateReaderMethod end
 Convert DNA/RNA fluorescence measurements to absolute units (e.g. concentration).
 
 # Arguments
-- `data_fl`: a DataFrame of fluorescence measurements.
-- `time_fl`: a DataFrame of times for the fluorescence measurements.
-- `method`: the method to use for quantifying fluorescence.
+- `data`: a DataFrame of fluorescence measurements.
+- `time`: a DataFrame of times for the fluorescence measurements.
+- `method`: the method to use for quantifying fluorescence. The methods match the Clearissa
+    software, and require a specific structure for the experimental design. See the
+    documentation for each method (or the Clearissa software documentation) for details.
 
 # Keyword Arguments
 - `plot_directory`: the directory to save plots to. If `nothing`, no plots are saved. If
@@ -20,6 +22,54 @@ Convert DNA/RNA fluorescence measurements to absolute units (e.g. concentration)
 """
 function quantification end
 
+"""
+    TMSD
+
+Convert arbitrary fluorescence units to a concentration (in nM) for Toehold Mediated Strand
+    Displacement (TMSD) reactions.
+
+Arguments:
+- `blank`: a DataFrame of blank fluorescence measurements.
+- `positive_controls`: a DataFrame of positive control fluorescence measurements.
+- `init_time`: a tuple of the form (start_time, end_time) describing the time window to use
+    for the initialisation phase.
+- `saturation_time`: a tuple of the form (start_time, end_time) describing the time window
+    to use for the saturation phase.
+- `positive_control_concentrations`: a Dict mapping the names of the positive control wells
+    to their concentrations in nM.
+
+Reaction has the form:
+    B + A-x -> A-B + x
+
+where:
+- B is the invader strand
+- A-x is the substrate complex
+- A-B is the product complex
+
+Total fluorescence is assumed to be of the form:
+    h(t) = [A-B] + β[A-x]
+
+This trajectory is estimated using:
+    h(t) = (f_raw(t) - f_blank(t)) / p_corr(t) * C_ref
+where:
+- f_raw(t) is the raw fluorescence measurement being quantified
+- f_blank(t) is the blank fluorescence measurement (calibration uses TimeseriesBlank)
+- p_corr(t) is the positive control calibration trajectory
+- C_ref is the concentration of the positive control
+
+For TMSD, C_ref is not relevant since it cancels with the positive control calibration
+    trajectory.
+
+β is estimated as the ratio of the mean of h(t) over the initialisation phase (init_time)
+    and [A-x]₀, the initial concentration of the substrate complex, estimated as the mean of
+    h(t) over the saturation phase (saturation_time), since saturation should mean the
+    reaction has gone to completion and all of the substrate complex has been converted to
+    product complex.
+
+Since [A-x]₀ = [A-B] + [A-x], we have that:
+    [A-B] = (h(t) - β[A-x]₀) / (1 - β)
+which is used to compute the final product concentration per well.
+"""
 @kwdef struct TMSD <: AbstractQuantificationMethod
     blank::DataFrame
     positive_controls::DataFrame
@@ -65,6 +115,49 @@ function quantification(data, time, method::TMSD; plot_directory=nothing)
     return h
 end
 
+"""
+    HMSD
+
+Convert arbitrary fluorescence units to a concentration (in nM) for Handhold Mediated Strand
+    Displacement (HMSD) reactions.
+
+Arguments:
+- `blank`: a DataFrame of blank fluorescence measurements.
+- `positive_controls`: a DataFrame of positive control fluorescence measurements.
+- `reference`: a DataFrame of reference fluorescence measurements.
+- `init_time`: a tuple of the form (start_time, end_time) describing the time window to use
+    for the initialisation phase.
+- `positive_control_concentrations`: a Dict mapping the names of the positive control wells
+    to their concentrations in nM.
+- `concentration_reference`: the concentration of the substrate-template in the reference control in nM.
+
+Reaction has the form:
+    S1-T + R1 -> S1-T-R1
+
+where:
+- S1-T is the substrate-template
+- R1 is the reporter
+- S1-T-R1 is the product complex
+
+Total fluorescence is assumed to be of the form:
+    h(t) = [S1-T] + β[S1-T-R1]
+
+This trajectory is estimated using:
+    h(t) = (f_raw(t) - f_blank(t)) / (f_ref(t) - f_blank(t)) * C_ref
+where:
+- f_raw(t) is the raw fluorescence measurement being quantified
+- f_blank(t) is the blank fluorescence measurement (calibration uses TimeseriesBlank)
+- f_ref(t) is the reference fluorescence measurement
+- C_ref is the concentration of the substrate-template in the reference control
+
+β is estimated as the ratio of the mean of p_corr(t) over the initialisation phase (init_time)
+    and the mean of f_ref(t) - f_blank(t) over the initialisation phase. This value of β is
+    used for the whole plate.
+
+Since [S1-T]₀ = [S1-T] + [S1-T-R1], we have that:
+    [S1-T-R1] = ([S1-T]₀ - h(t)) / (1 - β)
+which is used to compute the final product concentration per well.
+"""
 @kwdef struct HMSD <: AbstractQuantificationMethod
     blank::DataFrame
     positive_controls::DataFrame
@@ -117,6 +210,62 @@ function quantification(data, time, method::HMSD; plot_directory=nothing)
     return h
 end
 
+"""
+    InternalTMSD
+
+Convert arbitrary fluorescence units to a concentration (in nM) for Internal Toehold Mediated Strand
+    Displacement (Internal TMSD) reactions.
+
+Arguments:
+- `blank`: a DataFrame of blank fluorescence measurements.
+- `positive_controls`: a DataFrame of positive control fluorescence measurements.
+- `negative_controls`: a DataFrame of negative control fluorescence measurements.
+- `init_time`: a tuple of the form (start_time, end_time) describing the time window to use
+    for the initialisation phase.
+- `saturation_time`: a tuple of the form (start_time, end_time) describing the time window
+    to use for the saturation phase.
+- `stable_neg_time`: a tuple of the form (start_time, end_time) describing the time window
+    to use for the stable negative phase.
+- `positive_control_concentrations`: a Dict mapping the names of the positive control wells
+    to their concentrations in nM.
+- `trigger_time`: the time at which the reaction is triggered. All values before this time
+    are removed from the final output. Should be after the initialisation phase.
+
+Reaction has the form:
+    A-B-T + F -> A-B-F + T
+
+where:
+- A-B-T is the substrate
+- F is the invader/fuel
+- A-B-F is the fluorescent product
+- T is the template
+
+Total fluorescence is assumed to be of the form:
+    h(t) = [A-B-F] + β[A-B-T]
+
+This trajectory is estimated using:
+    h(t) = (f_raw(t) - f_blank(t)) / p_corr(t) * C_ref
+where:
+- f_raw(t) is the raw fluorescence measurement being quantified
+- f_blank(t) is the blank fluorescence measurement (calibration uses TimeseriesBlank)
+- p_corr(t) is the positive control calibration trajectory
+- C_ref is the concentration of the positive control
+
+For InternalTMSD, C_ref is not relevant since it cancels with the positive control
+    calibration trajectory.
+
+[A-B-T]₀, the initial concentration of the substrate complex, is estimated as the mean of
+    h(t) over the saturation phase (saturation_time), since saturation should mean the
+    reaction has gone to completion and all of the substrate complex has been converted to
+    product complex.
+
+The negative controls are used to estimate β, which is the ratio of the mean of h(t) over
+    the stable negative phase (stable_neg_time) and the median of [A-B-T]₀ across all wells.
+
+Since [A-B-T]₀ = [A-B-T] + [A-B-F], we have that:
+    [A-B-F] = (h(t) - β[A-B-T]₀) / (1 - β)
+which is used to compute the final product concentration per well.
+"""
 @kwdef struct InternalTMSD <: AbstractQuantificationMethod
     blank::DataFrame
     positive_controls::DataFrame
@@ -184,6 +333,36 @@ function quantification(data, time, method::InternalTMSD; plot_directory=nothing
     return h
 end
 
+"""
+    RelativeFluorescence
+
+Convert arbitrary fluorescence units to a relative fluorescence value (where 0 is defined by
+    a negative control and 1 is defined by positive controls).
+
+Arguments:
+- `blank`: a DataFrame of blank fluorescence measurements.
+- `positive_controls`: a DataFrame of positive control fluorescence measurements.
+- `negative_controls`: a DataFrame of negative control fluorescence measurements.
+- `init_time`: a tuple of the form (start_time, end_time) describing the time window to use
+    for the initialisation phase.
+- `stable_neg_time`: a tuple of the form (start_time, end_time) describing the time window
+    to use for the stable negative phase.
+- `positive_control_concentrations`: a Dict mapping the names of the positive control wells
+    to their concentrations in nM.
+- `concentration_reference`: the concentration of the positive control in nM.
+
+All data is calibrated with the blank timeseries using TimeseriesBlank.
+
+The negative control baseline, f_neg,base, is calculated as the mean of the negative control
+    fluorescence measurements over the stable negative phase.
+
+The relative fluorescence is calculated as:
+    RF(t) = (f_raw(t) - f_neg,base) / (p_corr(t) - f_neg,base)
+where:
+- f_raw(t) is the raw fluorescence measurement (after calibration) being quantified
+- f_neg,base is the negative control baseline
+- p_corr(t) is the positive control calibration trajectory
+"""
 @kwdef struct RelativeFluorescence <: AbstractQuantificationMethod
     blank::DataFrame
     positive_controls::DataFrame
