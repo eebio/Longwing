@@ -26,7 +26,7 @@ PAGES = [
         "flow_cytometers/mef_calibration.md",
         "flow_cytometers/transforms.md",
     ],
-    "Workflows" => "src/workflows.md",
+    "Workflows" => "workflows.md",
     "Data Format" => "data_format.md",
     "Command Line Interface" => "cli.md",
     "Excel Interface" => "excel.md",
